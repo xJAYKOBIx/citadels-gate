@@ -1,0 +1,196 @@
+<title>Citadel's Gate Sound Check</title>
+<style>
+:root{--bg:#141a16;--panel:#1c241f;--ink:#e9e4d6;--mute:#9aa59c;--gold:#e2b54a;--line:#2b3730;--on:#4caf7a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141a16}}
+:root[data-theme="dark"]{--bg:#141a16}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:0 0 4px;color:var(--gold)} .sub{color:var(--mute);margin:0 0 18px}
+h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:22px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+button{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:12px 10px;font:inherit;font-size:14px;cursor:pointer;text-align:left;min-height:56px}
+button:active{transform:scale(.98)} button small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+.bar label{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px} input[type=range]{width:150px}
+.tog{min-height:0;padding:8px 14px} .tog.on{border-color:var(--on);color:#c9f2d8}
+#gate{position:fixed;inset:0;background:rgba(10,14,12,.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:24px}
+#gate button{min-height:0;padding:14px 26px;font-size:17px;border-color:var(--gold);color:var(--gold)}
+.note{color:var(--mute);font-size:13px;margin-top:6px}
+</style>
+<div class="wrap">
+<h1>Citadel's Gate · sound check</h1>
+<p class="sub">Every cue the game will use, synthesised live. Tap anything; use the distance slider to hear how a far-off fight sits in the mix. Tell me which ones sound cheap and I'll rework them.</p>
+<div class="bar">
+  <label>Master <input type="range" id="lvl" min="0" max="100" value="100"></label>
+  <label>Distance <input type="range" id="dist" min="0" max="100" value="0"> <span id="distv">on top of it</span></label>
+  <label>Pan <input type="range" id="pan" min="-100" max="100" value="0"></label>
+  <button class="tog" id="amb">Forest ambience: off</button>
+  <button class="tog" id="brawl">Play a 12-second brawl</button>
+</div>
+<p class="note">The brawl plays a random mix at battle density so you can judge the voice limiting and whether anything gets fatiguing.</p>
+<div id="groups"></div>
+</div>
+<div id="gate"><div style="font-size:20px;color:var(--gold)">Sound check</div><div style="color:var(--mute);max-width:360px">Browsers only allow audio after a tap. Turn your volume to a normal level first.</div><button id="go">Start</button></div>
+<script>
+/* ---------- sound (v17): everything synthesised in Web Audio, no samples ----------
+   SFX.play(name, {x,y,vol,pitch})  spatialised by SFX.spatial(x,y) -> {gain,pan} (set by the game)
+   SFX.ambient(on)                   forest bed: wind, leaves, birds
+   SFX.setLevel(0..1) / SFX.mute(bool) / SFX.unlock() on the first pointer event                                  */
+const SFX=(()=>{
+  let ac=null, master, comp, busS, busA, busU, noise, brown, level=1, muted=false, voices=0, lastAt={}, amb=null;
+  const COOL={ bow:.05, bolt:.07, tracer:.045, melee:.07, cast:.09, spellHit:.11, shot:.09, flame:.22, lightning:.12, structHit:.09, flak:.08, keepShot:.12, infDie:.09, unitDie:.12, airDie:.3, soul:.06, orb:.09, hex:.09 };
+  const PRI={ bow:1, bolt:1, tracer:1, melee:1, soul:1, flak:1, infDie:1, structHit:2, cast:2, shot:2, flame:2, orb:2, hex:2, keepShot:2, unitDie:2, spellHit:3, lightning:3, airDie:3, machineDie:3 };
+  const MAXV=26;
+  function ctx(){
+    if(ac) return ac;
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
+    ac=new AC();
+    master=ac.createGain(); master.gain.value=muted?0:level;
+    comp=ac.createDynamicsCompressor(); comp.threshold.value=-16; comp.knee.value=18; comp.ratio.value=3.5; comp.attack.value=0.004; comp.release.value=0.18;
+    busS=ac.createGain(); busA=ac.createGain(); busU=ac.createGain(); busS.gain.value=1; busA.gain.value=0.55; busU.gain.value=0.7;
+    busS.connect(comp); busA.connect(comp); busU.connect(comp); comp.connect(master); master.connect(ac.destination);
+    noise=mkNoise(false); brown=mkNoise(true);
+    return ac;
+  }
+  function mkNoise(brownish){
+    const n=ac.sampleRate*2, b=ac.createBuffer(1,n,ac.sampleRate), d=b.getChannelData(0); let l=0;
+    for(let i=0;i<n;i++){ const w=Math.random()*2-1; if(brownish){ l=(l+0.02*w)/1.02; d[i]=l*3.2; } else d[i]=w; }
+    return b;
+  }
+  const unlock=()=>{ const c=ctx(); if(c && c.state==='suspended') c.resume(); };
+  const T=()=>ac.currentTime;
+  const r=(a,b)=>a+Math.random()*(b-a);
+  function env(p,t0,a,dur,peak,lin){ p.cancelScheduledValues(t0); p.setValueAtTime(0.0001,t0); p.linearRampToValueAtTime(peak,t0+a); if(lin) p.linearRampToValueAtTime(0.0001,t0+dur); else p.exponentialRampToValueAtTime(0.0001,t0+dur); }
+  // primitives: each returns a gain node to be wired to the voice output
+  function osc(type,f0,t0,dur,o={}){
+    const g=ac.createGain(), s=ac.createOscillator(); s.type=type; s.frequency.setValueAtTime(f0,t0);
+    if(o.f1!=null) s.frequency.exponentialRampToValueAtTime(Math.max(1,o.f1),t0+(o.ft||dur));
+    if(o.detune) s.detune.value=o.detune;
+    let n=s;
+    if(o.lp){ const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(o.lp,t0); if(o.lp1) f.frequency.exponentialRampToValueAtTime(o.lp1,t0+(o.lpt||dur)); f.Q.value=o.q||0.7; s.connect(f); n=f; }
+    n.connect(g); s.start(t0); s.stop(t0+dur+0.05); env(g.gain,t0,o.a||0.004,dur,o.peak||1,o.lin); return g;
+  }
+  function fm(fc,ratio,index,t0,dur,o={}){                     // metallic / bell partials
+    const g=ac.createGain(), c=ac.createOscillator(), m=ac.createOscillator(), mg=ac.createGain();
+    c.frequency.value=fc; m.frequency.value=fc*ratio; mg.gain.setValueAtTime(fc*index,t0); mg.gain.exponentialRampToValueAtTime(fc*index*0.05,t0+dur*0.7);
+    m.connect(mg); mg.connect(c.frequency); c.connect(g); c.start(t0); m.start(t0); c.stop(t0+dur+0.05); m.stop(t0+dur+0.05);
+    env(g.gain,t0,o.a||0.003,dur,o.peak||1); return g;
+  }
+  function nz(t0,dur,o={}){
+    const src=ac.createBufferSource(); src.buffer=o.brown?brown:noise; src.loop=true; src.playbackRate.value=o.rate||1;
+    const f=ac.createBiquadFilter(); f.type=o.type||'lowpass'; f.frequency.setValueAtTime(o.f0||2000,t0); if(o.f1) f.frequency.exponentialRampToValueAtTime(o.f1,t0+(o.ft||dur)); f.Q.value=o.q||0.8;
+    const g=ac.createGain(); env(g.gain,t0,o.a||0.003,dur,o.peak||1,o.lin);
+    src.connect(f); f.connect(g); src.start(t0,Math.random()*1.6); src.stop(t0+dur+0.05); return g;
+  }
+  function clicks(t0,n,gap,o={}){ const out=[]; let t=t0; for(let i=0;i<n;i++){ out.push(nz(t,o.dur||0.03,{ type:'bandpass', f0:(o.f||2500)*r(0.8,1.25), q:o.q||6, peak:(o.peak||0.6)*r(0.5,1) })); t+=gap*r(0.6,1.5); } return out; }
+  // ---- recipes: name -> (t0, p) => { nodes, dur, gain }  (p = pitch multiplier) ----
+  const R={
+    bow:(t,p)=>({ dur:.25, gain:0.7, nodes:[ osc('triangle',190*p,t,.12,{f1:120*p,peak:.7}), nz(t,.16,{type:'highpass',f0:1800,f1:3800,peak:.5,a:.002}), nz(t,.05,{type:'bandpass',f0:900,q:3,peak:.5}) ] }),
+    bolt:(t,p)=>({ dur:.3, gain:0.85, nodes:[ osc('square',95*p,t,.1,{f1:55*p,lp:900,peak:.6}), osc('triangle',240*p,t,.07,{f1:140*p,peak:.5}), nz(t,.2,{type:'highpass',f0:1200,f1:3000,peak:.55}), nz(t,.04,{f0:600,peak:.9}) ] }),
+    tracer:(t,p)=>({ dur:.14, gain:0.9, nodes:[ nz(t,.11,{type:'bandpass',f0:3200*p,f1:1100*p,q:2.5,peak:.9}), osc('sine',1500*p,t,.09,{f1:500*p,peak:.35}) ] }),
+    melee:(t,p)=>({ dur:.3, gain:0.8, nodes:[ osc('sine',130*p,t,.11,{f1:55*p,peak:.9}), nz(t,.07,{f0:1100,peak:.8}), fm(2100*p*r(.9,1.1),1.41,.6,t,.22,{peak:.18}), nz(t,.03,{type:'highpass',f0:4000,peak:.4}) ] }),
+    cast:(t,p)=>({ dur:.55, gain:.5, nodes:[ fm(520*p,2.01,1.6,t,.5,{peak:.35,a:.08}), osc('sine',640*p,t,.5,{f1:1500*p,ft:.45,peak:.25,a:.1}), nz(t,.5,{type:'highpass',f0:900,f1:5000,ft:.45,peak:.35,a:.08,lin:true}) ] }),
+    orb:(t,p)=>R.cast(t,p),
+    hex:(t,p)=>({ dur:.55, gain:0.75, nodes:[ fm(300*p,1.5,2.5,t,.5,{peak:.3,a:.05}), osc('sawtooth',220*p,t,.5,{f1:90*p,lp:900,lp1:300,peak:.3,a:.06}), nz(t,.45,{type:'bandpass',f0:600,f1:2400,q:2,peak:.3,a:.05}) ] }),
+    soul:(t,p)=>({ dur:.22, gain:0.8, nodes:[ osc('sine',900*p,t,.18,{f1:380*p,peak:.5}), nz(t,.15,{type:'bandpass',f0:2200,f1:800,q:3,peak:.45}) ] }),
+    spellHit:(t,p)=>({ dur:.9, gain:.95, nodes:[ osc('sine',95*p,t,.7,{f1:34*p,peak:1}), nz(t,.55,{f0:1400,f1:180,peak:.9,a:.004}), nz(t,.09,{type:'highpass',f0:2500,peak:.5}), ...clicks(t+.05,5,.03,{f:1800,peak:.3}) ] }),
+    shot:(t,p)=>({ dur:.7, gain:1, nodes:[ nz(t,.4,{f0:3500,f1:260,peak:1,a:.002}), osc('sine',70*p,t,.55,{f1:28*p,peak:.9}), nz(t,.03,{type:'highpass',f0:3000,peak:.9}), nz(t+.02,.5,{brown:true,f0:400,f1:120,peak:.6}) ] }),
+    keepShot:(t,p)=>({ dur:.6, gain:0.9, nodes:[ osc('triangle',150*p,t,.15,{f1:70*p,peak:.7}), nz(t,.3,{type:'highpass',f0:900,f1:2600,peak:.5}), nz(t,.08,{f0:700,peak:.8}) ] }),
+    flak:(t,p)=>({ dur:.3, gain:0.75, nodes:[ nz(t,.22,{f0:2400,f1:400,peak:.9}), osc('sine',180*p,t,.18,{f1:60*p,peak:.5}) ] }),
+    flame:(t,p)=>({ dur:.6, gain:.5, nodes:[ nz(t,.55,{type:'bandpass',f0:500*p,f1:900*p,q:1.2,peak:.9,a:.05,lin:true}), nz(t,.5,{brown:true,f0:300,peak:.5,a:.04,lin:true}), nz(t,.5,{type:'highpass',f0:3500,peak:.15,a:.05,lin:true}) ] }),
+    lightning:(t,p)=>({ dur:.8, gain:1, nodes:[ nz(t,.06,{type:'highpass',f0:900,peak:1,a:.001}), nz(t+.01,.3,{f0:3000,f1:500,peak:.7}), osc('sine',75*p,t+.02,.55,{f1:40*p,peak:.7}), nz(t+.06,.5,{type:'bandpass',f0:5000,q:1,peak:.2,lin:true}) ] }),
+    structHit:(t,p)=>({ dur:.3, gain:0.95, nodes:[ nz(t,.18,{f0:900,f1:250,peak:.9}), osc('sine',170*p,t,.14,{f1:85*p,peak:.6}), ...clicks(t+.02,3,.03,{f:1400,peak:.35}) ] }),
+    infDie:(t,p)=>({ dur:.2, gain:0.45, nodes:[ osc('sine',160*p,t,.12,{f1:70*p,peak:.6}), nz(t,.1,{f0:800,peak:.5}) ] }),
+    unitDie:(t,p)=>({ dur:.4, gain:0.7, nodes:[ osc('sine',140*p,t,.25,{f1:50*p,peak:.8}), nz(t,.2,{f0:1200,f1:300,peak:.6}), ...clicks(t+.03,4,.04,{f:1200,peak:.3}) ] }),
+    machineDie:(t,p)=>({ dur:.8, gain:.8, nodes:[ nz(t,.45,{f0:1800,f1:200,peak:1}), osc('sine',80*p,t,.5,{f1:30*p,peak:.8}), ...clicks(t+.08,7,.05,{f:900,q:4,peak:.45,dur:.04}), nz(t+.1,.5,{brown:true,f0:500,f1:150,peak:.4}) ] }),
+    airDie:(t,p)=>({ dur:1.1, gain:.7, nodes:[ osc('sawtooth',520*p,t,1.0,{f1:140*p,lp:1200,lp1:300,peak:.35,a:.02}), nz(t,1.0,{type:'bandpass',f0:1800,f1:300,q:1.5,peak:.5,a:.03}), nz(t+.85,.25,{f0:900,f1:200,peak:.7}) ] }),
+    towerFall:(t,p)=>({ dur:2.4, gain:1, gainBus:'S', duck:.5, nodes:[ nz(t,2.2,{brown:true,f0:500,f1:90,peak:1,a:.02}), osc('sine',48*p,t,1.6,{f1:30*p,peak:.9,a:.02}), nz(t,.4,{f0:1600,f1:300,peak:.8}), ...clicks(t+.15,14,.09,{f:700,q:3,peak:.5,dur:.05}) ] }),
+    keepFall:(t,p)=>({ dur:4, gain:1, duck:.7, nodes:[ nz(t,3.6,{brown:true,f0:600,f1:60,peak:1,a:.03}), osc('sine',42*p,t,2.6,{f1:26*p,peak:1,a:.03}), nz(t,.6,{f0:2000,f1:300,peak:.9}), ...clicks(t+.2,22,.11,{f:600,q:3,peak:.55,dur:.06}), fm(110,2,.8,t+.5,3,{peak:.35,a:.01}), fm(165,2,.5,t+1.2,2.6,{peak:.2,a:.01}) ] }),
+    // deploy stamps, one per race
+    dep_human:(t,p)=>({ dur:.6, gain:1.0, bus:'U', nodes:[ osc('sawtooth',220*p,t,.5,{detune:-6,lp:2200,lp1:500,peak:.35,a:.02}), osc('sawtooth',330*p,t,.5,{detune:6,lp:2200,lp1:500,peak:.3,a:.02}), nz(t,.08,{f0:1400,peak:.5}), osc('sine',110*p,t,.3,{f1:80*p,peak:.5}) ] }),
+    dep_elf:(t,p)=>({ dur:1, gain:.5, bus:'U', nodes:[ osc('triangle',294*p,t,.8,{peak:.5,a:.004}), osc('triangle',440*p,t+.07,.8,{peak:.45,a:.004}), osc('triangle',740*p,t+.14,.9,{peak:.4,a:.004}), nz(t,.5,{type:'highpass',f0:4500,peak:.08,a:.1,lin:true}) ] }),
+    dep_dwarf:(t,p)=>({ dur:.7, gain:1.0, bus:'U', nodes:[ fm(880*p,1.52,1.4,t,.6,{peak:.35}), fm(1320*p,2.75,.8,t,.4,{peak:.15}), osc('sine',110*p,t,.2,{f1:65*p,peak:.8}), nz(t,.05,{f0:2500,peak:.6}) ] }),
+    dep_orc:(t,p)=>({ dur:.7, gain:0.45, bus:'U', nodes:[ osc('sine',90*p,t,.35,{f1:48*p,peak:1}), nz(t,.1,{f0:500,peak:.7}), osc('sine',90*p,t+.17,.35,{f1:48*p,peak:.8}), nz(t+.17,.1,{f0:500,peak:.6}), osc('sawtooth',70*p,t+.05,.35,{f1:55*p,lp:320,peak:.35,a:.03}) ] }),
+    dep_skeletal:(t,p)=>({ dur:.8, gain:1.2, bus:'U', nodes:[ ...clicks(t,6,.045,{f:2600,q:8,peak:.7,dur:.025}), nz(t+.05,.65,{type:'bandpass',f0:340*p,q:9,peak:.4,a:.08,lin:true}), osc('sine',55*p,t,.5,{peak:.25,a:.05}) ] }),
+    dep_troll:(t,p)=>({ dur:.8, gain:.7, bus:'U', nodes:[ osc('sine',62*p,t,.5,{f1:34*p,peak:1}), nz(t,.12,{f0:400,peak:.7}), osc('sawtooth',58*p,t+.08,.45,{f1:44*p,lp:260,peak:.4,a:.04}), nz(t+.1,.35,{brown:true,f0:250,peak:.4,a:.05,lin:true}) ] }),
+    // stingers and UI
+    rankUp:(t,p)=>{ const n=[523,659,784,1046], out=[]; n.forEach((f,i)=>{ const tt=t+[0,.09,.18,.3][i]; out.push(osc('sine',f*p,tt,.9,{peak:.35,a:.005})); out.push(osc('sine',f*2*p,tt,.5,{peak:.08,a:.005})); }); out.push(osc('triangle',262*p,t,1.2,{peak:.12,a:.2,lin:true})); return { dur:1.4, gain:.8, bus:'U', duck:.35, nodes:out }; },
+    superCast:(t,p)=>({ dur:1.1, gain:.7, duck:.3, nodes:[ osc('sawtooth',110*p,t,1.0,{f1:330*p,lp:400,lp1:2400,peak:.35,a:.05,lin:true}), osc('sine',55*p,t,.3,{peak:.6}), osc('sine',55*p,t+.45,.3,{peak:.6}), nz(t,1.0,{type:'highpass',f0:800,f1:6000,peak:.25,a:.1,lin:true}) ] }),
+    superHit:(t,p)=>({ dur:2.6, gain:1, duck:.7, nodes:[ osc('sine',80*p,t,1.3,{f1:24*p,peak:1}), nz(t,.9,{f0:3000,f1:150,peak:1,a:.003}), nz(t+.05,2.2,{brown:true,f0:500,f1:80,peak:.8}), fm(220*p,1.5,.9,t+.1,2.2,{peak:.25,a:.01}), ...clicks(t+.1,8,.08,{f:1000,q:3,peak:.4,dur:.05}) ] }),
+    cache:(t,p)=>({ dur:.7, gain:0.7, bus:'U', nodes:[ osc('sine',1568*p,t,.35,{peak:.5,a:.003}), osc('sine',2093*p,t+.07,.5,{peak:.45,a:.003}), osc('sine',3136*p,t+.14,.4,{peak:.2,a:.003}), nz(t,.3,{type:'highpass',f0:6000,peak:.08,a:.05,lin:true}) ] }),
+    ui:(t,p)=>({ dur:.06, gain:0.7, bus:'U', nodes:[ osc('sine',900*p,t,.04,{peak:.7}), nz(t,.02,{type:'highpass',f0:3000,peak:.4}) ] }),
+    arm:(t,p)=>({ dur:.14, gain:0.7, bus:'U', nodes:[ osc('sine',660*p,t,.07,{peak:.6}), osc('sine',880*p,t+.06,.08,{peak:.6}) ] }),
+    bad:(t,p)=>({ dur:.25, gain:0.8, bus:'U', nodes:[ osc('sawtooth',160*p,t,.2,{f1:120*p,lp:700,peak:.5,a:.01}), osc('square',80*p,t,.18,{lp:400,peak:.25,a:.01}) ] }),
+    good:(t,p)=>({ dur:.4, gain:0.6, bus:'U', nodes:[ osc('sine',784*p,t,.25,{peak:.5}), osc('sine',1046*p,t+.09,.3,{peak:.45}) ] }),
+    alert:(t,p)=>({ dur:.5, gain:0.6, bus:'U', nodes:[ osc('triangle',440*p,t,.14,{peak:.6,a:.01}), osc('triangle',440*p,t+.17,.14,{peak:.6,a:.01}), osc('sine',220*p,t,.35,{peak:.2,a:.02}) ] }),
+    horn:(t,p)=>{ const out=[]; [[196,0,.5],[262,.45,.5],[392,.9,1.1]].forEach(([f,dt,d])=>{ out.push(osc('sawtooth',f*p,t+dt,d,{detune:-5,lp:1600,lp1:700,peak:.3,a:.04,lin:true})); out.push(osc('sawtooth',f*p,t+dt,d,{detune:5,lp:1600,lp1:700,peak:.3,a:.04,lin:true})); out.push(osc('sine',f*p/2,t+dt,d,{peak:.25,a:.04,lin:true})); }); return { dur:2.2, gain:.6, bus:'U', duck:.3, nodes:out }; },
+    victory:(t,p)=>{ const out=[]; [[523,0],[659,.12],[784,.24],[1046,.4],[1318,.62]].forEach(([f,dt])=>{ out.push(osc('sine',f*p,t+dt,1.2,{peak:.35,a:.005})); out.push(fm(f*p,2,.3,t+dt,.9,{peak:.12})); }); out.push(osc('triangle',262*p,t,2.2,{peak:.15,a:.3,lin:true})); out.push(osc('triangle',392*p,t,2.2,{peak:.12,a:.3,lin:true})); return { dur:2.6, gain:.8, bus:'U', duck:.5, nodes:out }; },
+    defeat:(t,p)=>{ const out=[]; [[392,0],[349,.35],[311,.7],[262,1.1]].forEach(([f,dt])=>{ out.push(osc('sawtooth',f*p,t+dt,1.0,{lp:900,lp1:300,peak:.3,a:.03})); out.push(osc('sine',f*p/2,t+dt,1.1,{peak:.3,a:.03})); }); out.push(osc('sine',65*p,t,2.4,{peak:.35,a:.4,lin:true})); return { dur:2.6, gain:.8, bus:'U', duck:.5, nodes:out }; },
+  };
+  let spatial=null;                                   // set by the game: (x,y) => {gain, pan}
+  function play(name,o={}){
+    if(!ac || muted || ac.state!=='running') return;
+    const rec=R[name]; if(!rec) return;
+    const now=T();
+    if(COOL[name] && lastAt[name] && now-lastAt[name]<COOL[name]) return;
+    let gain=o.vol??1, pan=0;
+    if(o.x!=null && spatial){ const s=spatial(o.x,o.y); if(s.gain<0.03) return; gain*=s.gain; pan=s.pan; }
+    if(voices>=MAXV && (PRI[name]||3)<3) return;
+    lastAt[name]=now;
+    const t0=now+0.005, v=rec(t0,(o.pitch??1)*r(0.96,1.04));
+    const g=ac.createGain(); g.gain.value=v.gain*gain;
+    const bus=v.bus==='U'?busU:busS;
+    if(ac.createStereoPanner){ const pn=ac.createStereoPanner(); pn.pan.value=Math.max(-1,Math.min(1,pan)); g.connect(pn); pn.connect(bus); } else g.connect(bus);
+    for(const n of v.nodes) n.connect(g);
+    voices++; setTimeout(()=>{ voices--; try{ g.disconnect(); }catch(_){} },(v.dur+0.1)*1000);
+    if(v.duck){ const d=v.duck; busS.gain.cancelScheduledValues(now); busS.gain.setValueAtTime(busS.gain.value,now); busS.gain.linearRampToValueAtTime(1-d*0.7,now+0.05); busS.gain.linearRampToValueAtTime(1,now+0.05+d); }
+  }
+  // ---- ambience: wind, leaves, birds ----
+  function ambient(on){
+    if(!ac) return;
+    if(!on){ if(amb){ amb.stop(); amb=null; } return; }
+    if(amb) return;
+    const t=T(), nodes=[], timers=[];
+    const wind=ac.createBufferSource(); wind.buffer=brown; wind.loop=true; const wf=ac.createBiquadFilter(); wf.type='lowpass'; wf.frequency.value=320; wf.Q.value=0.6;
+    const wg=ac.createGain(); wg.gain.value=0.0001; wind.connect(wf); wf.connect(wg); wg.connect(busA); wind.start(t);
+    const lfo=ac.createOscillator(), lg=ac.createGain(); lfo.frequency.value=0.07; lg.gain.value=0.12; lfo.connect(lg); lg.connect(wg.gain); lfo.start(t);
+    wg.gain.linearRampToValueAtTime(0.3,t+3);
+    const lf2=ac.createOscillator(), lg2=ac.createGain(); lf2.frequency.value=0.19; lg2.gain.value=120; lf2.connect(lg2); lg2.connect(wf.frequency); lf2.start(t);
+    const leaves=ac.createBufferSource(); leaves.buffer=noise; leaves.loop=true; const lfl=ac.createBiquadFilter(); lfl.type='highpass'; lfl.frequency.value=3800;
+    const lgn=ac.createGain(); lgn.gain.value=0.0001; leaves.connect(lfl); lfl.connect(lgn); lgn.connect(busA); leaves.start(t,0.7);
+    lgn.gain.linearRampToValueAtTime(0.035,t+4); const lfo3=ac.createOscillator(), lg3=ac.createGain(); lfo3.frequency.value=0.11; lg3.gain.value=0.02; lfo3.connect(lg3); lg3.connect(lgn.gain); lfo3.start(t);
+    nodes.push(wind,lfo,lf2,leaves,lfo3);
+    let alive=true;
+    const bird=()=>{ if(!alive) return;
+      const tt=T()+0.05, pan=r(-0.9,0.9), kind=Math.random(), g=ac.createGain(); g.gain.value=r(0.12,0.26);
+      const pn=ac.createStereoPanner?ac.createStereoPanner():null; if(pn){ pn.pan.value=pan; g.connect(pn); pn.connect(busA); } else g.connect(busA);
+      if(kind<0.55){ const n=2+Math.floor(Math.random()*4), base=r(2200,3400); for(let i=0;i<n;i++){ const t0=tt+i*r(0.09,0.16); osc('sine',base*r(0.9,1.1),t0,0.09,{f1:base*r(1.2,1.6),ft:0.06,peak:1,a:0.01}).connect(g); } }
+      else if(kind<0.85){ const t0=tt, f=r(1800,2600); osc('sine',f,t0,0.35,{f1:f*1.9,ft:0.3,peak:.8,a:.03,lin:true}).connect(g); osc('sine',f*1.9,t0+0.33,0.2,{f1:f*1.3,ft:0.18,peak:.7,a:.01}).connect(g); }
+      else { const f=r(380,460); osc('sine',f,tt,0.28,{f1:f*0.9,peak:.9,a:.03,lin:true}).connect(g); osc('sine',f*0.92,tt+0.34,0.4,{f1:f*0.8,peak:.8,a:.03,lin:true}).connect(g); }
+      timers.push(setTimeout(bird,r(1800,5200))); };
+    timers.push(setTimeout(bird,1500));
+    amb={ stop(){ alive=false; timers.forEach(clearTimeout); const te=T(); wg.gain.linearRampToValueAtTime(0.0001,te+1.2); lgn.gain.linearRampToValueAtTime(0.0001,te+1.2); setTimeout(()=>nodes.forEach(n=>{ try{ n.stop(); }catch(_){} }),1400); } };
+  }
+  function setLevel(v){ level=Math.max(0,Math.min(1,v)); if(master) master.gain.setTargetAtTime(muted?0:level,T(),0.05); }
+  function mute(m){ muted=!!m; if(master) master.gain.setTargetAtTime(muted?0:level,T(),0.05); }
+  return { unlock, play, ambient, setLevel, mute, get level(){ return level; }, get muted(){ return muted; }, set spatial(f){ spatial=f; }, names:()=>Object.keys(R), ready:()=>!!ac && ac.state==='running', _ac:()=>ctx() };
+})();
+
+const GROUPS=[
+ ['Combat · launches',[['bow','Arrows: scouts, line, archers'],['bolt','Ballista / harpoon / crossbow'],['tracer','Flyer strafe'],['melee','Infantry blow'],['cast','Mage mortar launch'],['hex','Dark caster launch'],['soul','Undead keep / tower shot'],['shot','Cannon']]],
+ ['Combat · impacts',[['spellHit','Mortar / splash impact'],['lightning','Storm bolt'],['flame','Flame cone burst'],['flak','Keep anti-air burst'],['keepShot','Covenant keep shot'],['structHit','Hit on a tower or keep']]],
+ ['Losses',[['infDie','Infantry falls'],['unitDie','Unit dies'],['machineDie','Wagon / engine wrecked'],['airDie','Flyer shot down'],['towerFall','Tower destroyed'],['keepFall','Keep destroyed']]],
+ ['Deploy stamps (one per race)',[['dep_human','Human: brass'],['dep_elf','Elf: harp'],['dep_dwarf','Dwarf: anvil'],['dep_orc','Orc: war drum'],['dep_skeletal','Skeletal: bone rattle'],['dep_troll','Troll: thud and growl']]],
+ ['Stingers',[['horn','Match start horn'],['rankUp','Rank seal broken'],['superCast','Commander strike called'],['superHit','Commander strike lands'],['cache','Relic cache taken'],['alert','Enemy elite fielded'],['victory','Victory'],['defeat','Defeat']]],
+ ['Interface',[['ui','Tap'],['arm','Card armed'],['good','Good news toast'],['bad','Can\'t do that']]],
+];
+const G=document.getElementById('groups');
+for(const [title,items] of GROUPS){ const h=document.createElement('h2'); h.textContent=title; G.appendChild(h); const g=document.createElement('div'); g.className='grid'; for(const [id,label] of items){ const b=document.createElement('button'); b.innerHTML=label+'<small>'+id+'</small>'; b.onclick=()=>SFX.play(id,{x:1,y:0}); g.appendChild(b); } G.appendChild(g); }
+const dist=document.getElementById('dist'), pan=document.getElementById('pan'), distv=document.getElementById('distv');
+SFX.spatial=(x,y)=>{ const d=dist.value/100*900; return { gain:1/(1+(d/380)*(d/380)), pan:pan.value/100 }; };
+dist.oninput=()=>{ const d=dist.value/100*900; distv.textContent=d<60?'on top of it':d<300?'next to you':d<600?'across the glade':'far lane'; };
+document.getElementById('lvl').oninput=e=>SFX.setLevel(e.target.value/100);
+let ambOn=false; document.getElementById('amb').onclick=e=>{ ambOn=!ambOn; SFX.ambient(ambOn); e.target.textContent='Forest ambience: '+(ambOn?'on':'off'); e.target.classList.toggle('on',ambOn); };
+document.getElementById('brawl').onclick=()=>{ const t0=performance.now(); const pool=['bow','bow','bow','melee','melee','melee','bolt','tracer','cast','spellHit','soul','infDie','infDie','unitDie','structHit','flak','shot','keepShot']; const tick=()=>{ if(performance.now()-t0>12000) return; const n=1+Math.floor(Math.random()*3); for(let i=0;i<n;i++){ const old=SFX.spatial; SFX.spatial=(x,y)=>({gain:0.35+Math.random()*0.65, pan:Math.random()*1.6-0.8}); SFX.play(pool[Math.floor(Math.random()*pool.length)],{x:1,y:0}); SFX.spatial=old; } setTimeout(tick,60+Math.random()*140); }; tick(); setTimeout(()=>SFX.play('towerFall',{x:1,y:0}),6000); setTimeout(()=>SFX.play('rankUp'),9000); };
+document.getElementById('go').onclick=()=>{ SFX.unlock(); document.getElementById('gate').remove(); setTimeout(()=>SFX.play('horn'),200); };
+</script>

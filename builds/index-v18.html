@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="cg-version" content="v18.1">
 <title>Citadel's Gate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -382,8 +381,6 @@ html.side .vs img{width:44px; height:44px;} html.side .vs{margin:0;}
 .mp-card{max-width:560px;}
 .mp-card h1{margin:0;}
 .mp-status{color:var(--muted); margin:0;}
-.mp-menu .btn:disabled{opacity:.45; cursor:not-allowed; filter:saturate(.4);}
-.mp-msg:empty{display:none;} .mp-msg.bad{color:#f0a0a6;} .mp-who a{color:inherit; text-decoration:underline;} .mp-who b{color:var(--text);}
 .mp-code{display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:10px 12px; border:1px dashed var(--edge-strong); border-radius:8px;}
 .mp-code span{color:var(--muted); font-size:13px; flex:1 1 100%;} .mp-code b{font-family:var(--display); font-size:30px; letter-spacing:.25em;}
 .mp-code .btn{min-height:36px; padding:0 12px; font-size:14px;}
@@ -508,11 +505,9 @@ html.side .mp-chatlog{left:auto; right:max(90px,env(safe-area-inset-right,0px));
       <section><h2>Graphics</h2><div class="seg" id="mGfx"></div></section>
     </div>
     <section class="mp-menu"><h2>Play a friend</h2>
-      <p class="lnote mp-who" id="mpWho">Checking your sign-in…</p>
-      <div class="mp-row"><button class="btn primary" id="mpCreate" disabled>Create a room</button><button class="btn" id="mpResume" hidden>Resume saved match</button></div>
-      <div class="mp-row"><input id="mpCodeIn" class="mp-in code" maxlength="5" placeholder="ROOM CODE" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn" id="mpJoinBtn" disabled>Join</button></div>
-      <p class="lnote mp-msg" id="mpMsg" role="status"></p>
-      <p class="lnote">Pick your commander above first. Your friend joins with the code or the link and plays the other faction. Both of you need a JAYKOBI GAMES account.</p></section>
+      <div class="mp-row"><input id="mpName" class="mp-in" maxlength="24" placeholder="Your name" autocomplete="nickname"><button class="btn primary" id="mpCreate">Create a room</button></div>
+      <div class="mp-row"><input id="mpCodeIn" class="mp-in code" maxlength="5" placeholder="ROOM CODE" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn" id="mpJoinBtn">Join</button><button class="btn" id="mpResume" hidden>Resume saved match</button></div>
+      <p class="lnote">Pick your commander above first. Your friend joins with the code or the link; they play the other faction.</p></section>
     <div class="start-row"><span class="sum" id="mSum"></span><span class="btns" style="margin:0"><button class="btn" id="mFs" hidden>Fullscreen</button><button class="btn" id="mLab">Library</button><button class="btn primary" id="mStart">Start battle</button></span></div>
     <details class="how" id="how">
       <summary>How to play</summary>
@@ -2681,7 +2676,7 @@ function applyCmd(c){
     case 'lane': { const u=entById(c.u); if(!u||u.dead||u.team!==team) return false; return orderLane(u); }
     case 'seal': return buySeal(team);
     case 'super': return fireSuper(team,c.x,c.y);
-    case 'surrender': { if(S.phase!=='play') return false; S.phase='over'; S.winner=1-team; S.surrendered=team===ME; S.endTime=S.t; S.overAt=performance.now()-2000; return true; }
+    case 'surrender': { if(S.phase!=='play') return false; S.phase='over'; S.winner=1-team; S.surrendered=team===0; S.endTime=S.t; S.overAt=performance.now()-2000; return true; }
   }
   return false;
 }
@@ -2690,11 +2685,10 @@ const SNAP_SKIP=new Set(['fx','corpses','shake','selected','armed','armedSuper',
 const ENT_SKIP=new Set(['tagUntil','_pf','_bank','_atkSeen','_cyc','showT','gait']);
 function defKey(d){ if(!d||!d.id) return null; if(UNITS[d.id]===d) return 'U:'+d.id; if(INF[d.id]===d) return 'I:'+d.id; return null; }
 function defOf(k){ return k[0]==='U'?UNITS[k.slice(2)]:INF[k.slice(2)]; }
-let PACK_SEEN=null;   // entities referenced while packing (some may already have left S.ents: a bolt still flying at a fallen target)
 function packVal(v,depth=0){
   if(v==null || typeof v!=='object') return typeof v==='function'?undefined:v;
   if(depth>12) return undefined;
-  if(v.kind && v.id!=null && (v.kind==='unit'||v.kind==='inf'||v.kind==='keep'||v.kind==='tower')){ if(PACK_SEEN) PACK_SEEN.set(v.id,v); return {$e:v.id}; }
+  if(v.kind && v.id!=null && (v.kind==='unit'||v.kind==='inf'||v.kind==='keep'||v.kind==='tower')) return {$e:v.id};
   const dk=defKey(v); if(dk) return {$d:dk};
   const ci=S.caches.indexOf(v); if(ci>=0) return {$c:ci};
   if(Array.isArray(v)) return v.map(x=>packVal(x,depth+1)).map(x=>x===undefined?null:x);
@@ -2702,17 +2696,11 @@ function packVal(v,depth=0){
 }
 function packEnt(e){ const o={}; for(const [k,v] of Object.entries(e)){ if(ENT_SKIP.has(k)||k[0]==='_') continue; if(k==='def'){ o.def=defKey(v); continue; } const p=packVal(v,1); if(p!==undefined) o[k]=p; } return o; }
 function serializeState(){
-  PACK_SEEN=new Map();
   const out={ v:1, map:MAP_ID, setup:S.setup, seed:S.seed, rs:S.rs|0 };
   for(const [k,v] of Object.entries(S)){ if(SNAP_SKIP.has(k)||k[0]==='_') continue; const p=packVal(v); if(p!==undefined) out[k]=p; }
   out.teams=S.teams.map(T=>{ const o={}; for(const [k,v] of Object.entries(T)){ if(['cmd','faction','pal','roster','inf','race','ai'].includes(k)) continue; o[k]=packVal(v); } if(T.ai){ const a={}; for(const [k,v] of Object.entries(T.ai)){ if(k==='diff'||k==='spots') continue; a[k]=packVal(v); } o.ai=a; } return o; });
   out.ents=S.ents.map(packEnt);
   out.caches=S.caches.map(c=>{ const o={}; for(const [k,v] of Object.entries(c)) o[k]=packVal(v); return o; });
-  // v18.1: entities still referenced but no longer on the field travel along, so a restored copy steps exactly like the original
-  const inEnts=new Set(S.ents.map(e=>e.id)), ghosts=[], done=new Set();
-  for(let more=true; more;){ more=false; for(const [id,e] of [...PACK_SEEN]){ if(inEnts.has(id)||done.has(id)) continue; done.add(id); ghosts.push(packEnt(e)); more=true; } }
-  if(ghosts.length) out.ghosts=ghosts;
-  PACK_SEEN=null;
   return out;
 }
 function unpackVal(v,byId){
@@ -2726,16 +2714,14 @@ function unpackVal(v,byId){
 function restoreState(snap,opts={}){
   if(snap.map!==MAP_ID) throw new Error('snapshot is for map '+snap.map);
   newMatch(snap.setup,{ seed:snap.seed, foe:snap.teams[1].cmdKey, aiBoth:!!snap.teams[0].ai, noAI:opts.noAI });
+  for(const [k,v] of Object.entries(snap)){ if(['v','map','setup','seed','rs','teams','ents','caches'].includes(k)) continue; S[k]=unpackVal(v,new Map()); }
   S.rs=snap.rs|0;
   // entities first (refs resolve in a second pass), caches before refs to them
   S.caches=snap.caches.map(c=>({...c}));
-  const byId=new Map(), mk=e=>{ const o={}; for(const [k,v] of Object.entries(e)) o[k]=k==='def'?defOf(v):v; byId.set(o.id,o); return o; };
-  const raw=snap.ents.map(mk), ghosts=(snap.ghosts||[]).map(mk);
-  for(const o of raw.concat(ghosts)) for(const k of Object.keys(o)){ if(k==='def') continue; o[k]=unpackVal(o[k],byId); }
+  const byId=new Map(), raw=snap.ents.map(e=>{ const o={}; for(const [k,v] of Object.entries(e)) o[k]=k==='def'?defOf(v):v; byId.set(o.id,o); return o; });
+  for(const o of raw) for(const k of Object.keys(o)){ if(k==='def') continue; o[k]=unpackVal(o[k],byId); }
   for(const c of S.caches) for(const k of Object.keys(c)) c[k]=unpackVal(c[k],byId);
   S.ents=raw; S.keeps=raw.filter(e=>e.kind==='keep'); S.towers=raw.filter(e=>e.kind==='tower');
-  // v18.1: match-level state (projectiles in flight, the spawn queue…) resolves its entity refs only now that the entities exist
-  for(const [k,v] of Object.entries(snap)){ if(['v','map','setup','seed','rs','teams','ents','caches','ghosts'].includes(k)) continue; S[k]=unpackVal(v,byId); }
   snap.teams.forEach((t,i)=>{ const T=S.teams[i]; for(const [k,v] of Object.entries(t)){ if(k==='ai') continue; T[k]=unpackVal(v,byId); }
     if(t.ai && !opts.noAI){ if(!T.ai) T.ai=makeAI(i,t.diffKey||S.setup.diff); for(const [k,v] of Object.entries(t.ai)) T.ai[k]=unpackVal(v,byId); } else if(opts.noAI) T.ai=null; });
   S.fx=[]; S.corpses=[]; S.selected=null; S.armed=null; S.armedSuper=false; S.paused=false; S.speed=1;
@@ -2753,58 +2739,49 @@ function stateHash(){
 }
 /* ---------- v18 networked match: lockstep client ----------
    NET talks to a room through a transport { send(obj), close() } that calls NET.recv(obj) for each message.
-   The default transport is JSON over WebSocket (NET.connectWs); tests inject their own. The room is src/room.ts,
-   hosted by the website (jaykobi-website/server/citadel.ts); who you are comes from your site sign-in, not from here. */
+   The default transport is JSON over WebSocket (NET.connectWs); tests inject their own. The room protocol is in room.js. */
 NET={
-  active:false, seat:-1, code:null, name:'', tr:null, room:null,
+  active:false, seat:-1, code:null, token:null, name:'', tr:null, room:null,
   turnMs:100, tpt:3, turns:new Map(), lastTurn:0, tick:0, allowed:0, acc:0, pending:[], state:'idle', peerAway:false, awayLimit:0, awaySince:0,
-  snapWait:null, resyncTick:-1, resyncFrom:-1, chatLog:[], onUi:()=>{}, lastSum:0, pingAt:0, rtt:0, countdownAt:0,
+  snapWait:null, resyncTick:-1, chatLog:[], onUi:()=>{}, lastSum:0, pingAt:0, rtt:0, countdownAt:0,
   get waiting(){ return this.state==='play' && this.tick>=this.allowed; },
-  // a match is "live" here while this page still holds its simulation; a refreshed page is not, and receives the state instead
-  get live(){ return this.active && (this.state==='play'||this.state==='paused'||this.state==='countdown') && !!S && !S.demo && !!S.net; },
   // ---- transport ----
   connectWs(url,hello){
-    try{ if(this.tr) this.tr.close(); }catch(_){}
-    const ws=new WebSocket(url); this.ws=ws; this.tr={ send:o=>{ if(ws.readyState===1) ws.send(JSON.stringify(o)); }, close:()=>ws.close() };
-    ws.onopen=()=>{ if(this.ws!==ws) return; this._tries=0; this.tr.send({ t:'hello', ...hello(), live:this.live, lastTurn:this.lastTurn }); this.ui('connected'); };
+    try{ this.tr&&this.tr.close(); }catch(_){}
+    const ws=new WebSocket(url); this.tr={ send:o=>{ if(ws.readyState===1) ws.send(JSON.stringify(o)); }, close:()=>ws.close() };
+    ws.onopen=()=>{ this.tr.send({ t:'hello', ...hello }); this.ui('connected'); };
     ws.onmessage=e=>{ let m; try{ m=JSON.parse(e.data); }catch(_){ return; } this.recv(m); };
-    ws.onclose=e=>{ if(this.ws!==ws) return;
-      if(e.code===4003||e.code===4004||e.code===4005||e.code===4001){ this.ui('refused',{ code:e.code, reason:e.reason }); if(e.code!==4004) this.state='idle'; return; }
-      if(this.state==='play'||this.state==='paused'||this.state==='countdown'||this.state==='lobby'){ this.ui('dropped'); this.reconnect(url,hello); }
-      else this.ui('closed'); };
+    ws.onclose=()=>{ if(this.state==='play'||this.state==='paused'||this.state==='countdown'){ this.ui('dropped'); this.reconnect(url,hello); } else this.ui('closed'); };
     ws.onerror=()=>{};
     return ws;
   },
-  // one retry timer at a time; the socket's own close handler is the only thing that schedules the next try
-  reconnect(url,hello){ if(this._rc) return; this._tries=(this._tries||0)+1; if(this._tries>40){ this.ui('closed'); return; }
-    this._rc=setTimeout(()=>{ this._rc=null; if(this.state==='idle'||this.state==='over') return; this.connectWs(url,hello); },Math.min(8000,400*this._tries)); },
+  reconnect(url,hello){ if(this._rc) return; let tries=0; const go=()=>{ this._rc=null; if(this.state==='idle'||this.state==='over') return; tries++; const ws=this.connectWs(url,{ ...hello, token:this.token }); ws.addEventListener('close',()=>{ if(tries<40) this._rc=setTimeout(go,Math.min(8000,500*tries)); }); }; this._rc=setTimeout(go,600); },
   attach(tr){ this.tr=tr; },
   send(o){ if(this.tr) this.tr.send(o); },
   ui(ev,data){ try{ this.onUi(ev,data); }catch(e){ console.error(e); } },
   // ---- lobby ----
-  hello(hello){ this.send({ t:'hello', ...hello, live:this.live, lastTurn:this.lastTurn }); },
+  hello(hello){ this.name=hello.name; this.send({ t:'hello', ...hello }); },
   ready(on,cmd){ this.send({ t:'ready', on, cmd }); },
   setSetup(setup){ this.send({ t:'setup', setup }); },
   startMatch(){ this.send({ t:'start' }); },
   chat(id){ this.send({ t:'chat', id }); },
   rematch(){ this.send({ t:'rematch' }); },
   forfeitAway(){ this.send({ t:'forfeit' }); },
-  leave(){ this.send({ t:'leave' }); this.state='idle'; this.active=false; clearTimeout(this._rc); this._rc=null; const tr=this.tr; this.tr=null; this.ws=null; try{ tr&&tr.close(); }catch(_){} NET_RESET(); },
+  leave(){ this.send({ t:'leave' }); this.state='idle'; this.active=false; try{ this.tr&&this.tr.close(); }catch(_){} this.tr=null; NET_RESET(); },
   // ---- commands ----
   issue(c){ if(this.state!=='play') return; this.send({ t:'cmd', c }); },
   // ---- messages from the room ----
   recv(m){
     switch(m.t){
-      case 'room': this.code=m.code; if(m.seat!=null) this.seat=m.seat; this.room=m; this.ui('room',m); break;
+      case 'room': this.code=m.code; if(m.seat!=null) this.seat=m.seat; if(m.token) this.token=m.token; this.room=m; this.ui('room',m); break;
       case 'error': this.ui('error',m.msg); break;
-      case 'start': this.active=true; this.state='countdown'; this.turnMs=m.turnMs||100; this.tpt=m.ticksPerTurn||3; this.turns.clear(); this.lastTurn=0; this.tick=0; this.allowed=0; this.acc=0; this.peerAway=false; this._overSent=false; this.resyncTick=-1; this.countdownAt=performance.now();
+      case 'start': this.active=true; this.state='countdown'; this.turnMs=m.turnMs||100; this.tpt=m.ticksPerTurn||3; this.turns.clear(); this.lastTurn=0; this.tick=0; this.allowed=0; this.acc=0; this.peerAway=false; this.countdownAt=performance.now();
         this.ui('start',m); break;
       case 'turn': this.turns.set(m.n,m.cmds); this.lastTurn=Math.max(this.lastTurn,m.n); this.allowed=this.lastTurn*this.tpt; if(this.state==='countdown'){ this.state='play'; this.ui('go'); } break;
-      case 'pause': if(this.state!=='lobby') this.state='paused'; this.ui('pause',m); break;
+      case 'pause': this.state='paused'; this.ui('pause',m); break;
       case 'peer': if(m.state==='away'){ this.peerAway=true; this.awayLimit=m.limit||120000; this.awaySince=performance.now(); } else if(m.state==='back') this.peerAway=false; this.ui('peer',m); break;
-      // the room names who holds the truth (from); that player snapshots when its sim reaches the tick, the other waits
-      case 'resync': this.resyncTick=m.tick; this.resyncFrom=m.from; if(m.from===this.seat && this.tick>=m.tick) this.sendState(); this.ui('resync',m); break;
-      case 'state': this.ui('state',m); break;                                                              // the other side restores (mpEvent → applyState)
+      case 'resync': this.resyncTick=m.tick; if(this.seat===0 && this.tick>=m.tick) this.sendState(); this.ui('resync',m); break;                                    // host: snapshot when the sim reaches m.tick
+      case 'state': this.ui('state',m); break;                                                              // guest: restore
       case 'resume': this.state='countdown'; this.countdownAt=performance.now(); this.ui('resume',m); break;
       case 'chat': this.chatLog.push(m); this.ui('chat',m); break;
       case 'over': this.state='over'; this.ui('over',m); break;
@@ -2814,102 +2791,62 @@ NET={
   // returns how many sim ticks were run; applies each turn's commands on its first tick
   advance(dt){
     if(this.state!=='play' && this.state!=='paused') return 0;          // while paused the sim may still finish the turns it already holds
-    // the source snapshots exactly at the requested tick, before stepping past it
-    if(this.resyncTick>=0 && this.resyncFrom===this.seat && this.tick>=this.resyncTick){ this.sendState(); }
-    let behind=this.allowed-this.tick; if(this.resyncTick>=0 && this.resyncFrom===this.seat) behind=Math.min(behind,this.resyncTick-this.tick);
-    if(behind<=0){ this.acc=0; return 0; }
+    // the host snapshots exactly at the requested tick, before stepping past it
+    if(this.resyncTick>=0 && this.seat===0 && this.tick>=this.resyncTick){ this.sendState(); }
+    const behind=this.allowed-this.tick; if(behind<=0){ this.acc=0; return 0; }
     this.acc+=dt; let n=0; const maxSteps=behind>this.tpt*6?6:behind>this.tpt*2?3:1;     // catch up after a hiccup, but gently
-    while(this.acc>=STEP && n<maxSteps && this.tick<this.allowed && !(this.resyncTick>=0 && this.resyncFrom===this.seat && this.tick>=this.resyncTick)){
+    while(this.acc>=STEP && n<maxSteps && this.tick<this.allowed){
       this.acc-=STEP;
       if(this.tick%this.tpt===0){ const turn=this.tick/this.tpt+1, cmds=this.turns.get(turn)||[]; for(const c of cmds) applyCmd(c); this.turns.delete(turn); }
       step(STEP); this.tick++; n++;
       if(this.tick%30===0){ this.send({ t:'sum', tick:this.tick, hash:stateHash() }); }
-      // the host leaves a checkpoint with the room once a minute: if both players ever lose the page, the match resumes from it
-      if(this.seat===0 && this.tick%1800===0){ this.send({ t:'checkpoint', tick:this.tick, snap:serializeState() }); }
       if(S.phase==='over' && !this._overSent){ this._overSent=true; this.send({ t:'over', winner:S.winner }); }
     }
     if(this.tick>=this.allowed) this.acc=Math.min(this.acc,STEP);
     return n;
   },
-  // after a resync the room numbers turns from this tick again: drop anything held beyond it
-  truncate(tick){ this.tick=tick; this.turns.clear(); this.lastTurn=Math.floor(tick/this.tpt); this.allowed=tick; this.acc=0; },
-  sendState(){ if(this.resyncTick<0) return; const snap=serializeState(); this.send({ t:'state', tick:this.tick, snap }); this.truncate(this.tick); this.resyncTick=-1; },
-  applyState(m){ restoreState(m.snap,{ noAI:true }); S.net=true; S.speed=1; this.truncate(m.tick); this.resyncTick=-1; this.send({ t:'synced', tick:this.tick }); },
+  sendState(){ if(this.resyncTick<0) return; const snap=serializeState(); this.send({ t:'state', tick:this.tick, snap }); this.resyncTick=-1; },
+  applyState(m){ restoreState(m.snap,{ noAI:true }); this.tick=m.tick; for(const k of [...this.turns.keys()]) if(k*this.tpt<=this.tick) this.turns.delete(k); this.acc=0; this.send({ t:'synced', tick:this.tick }); },
 };
-function NET_RESET(){ NET.turns.clear(); NET.tick=0; NET.allowed=0; NET.lastTurn=0; NET.acc=0; NET.peerAway=false; NET.resyncTick=-1; NET.resyncFrom=-1; NET._overSent=false; NET.room=null; NET.seat=-1; NET.chatLog=[]; NET.active=false; }
 window.NET=NET;
 function netWaitUI(n){ if(typeof netWaitUI.impl==='function') netWaitUI.impl(n); }
+function NET_RESET(){ NET.turns.clear(); NET.tick=0; NET.allowed=0; NET.acc=0; NET.peerAway=false; NET.resyncTick=-1; NET._overSent=false; NET.room=null; NET.seat=-1; NET.chatLog=[]; }
 /* ---------- v18 multiplayer UI: Play a friend, waiting room, pause/rejoin, quick chat, rematch, host saves ----------
-   v18.1: rooms, names and saves come from the JAYKOBI GAMES account. The game runs on the site (same origin) at
-   /play/citadels-gate; rooms live at /api/citadel/rooms/*, saves at /api/platform/saves/citadels-gate/<slot>.
-   Off the site (claude.ai preview, a file) multiplayer is unavailable and single player is unchanged. */
-const MP={ overlayOn:false, lastRoom:null, saveKey:'cc-mp-save', slot:'match', platform:null, user:null, saveRev:0, cloudSave:null };
+   MP.url: where rooms live (same origin by default: wss://<host>/rooms/<CODE>). Set MP_ROOMS_URL before this script to point elsewhere. */
+const MP={ url:(typeof MP_ROOMS_URL!=='undefined'&&MP_ROOMS_URL)||null, name:(()=>{ try{ return localStorage.getItem('cc-name')||''; }catch(_){ return ''; } })(), overlayOn:false, lastRoom:null, saveKey:'cc-mp-save' };
 const CHAT_LINES=['Good luck!','Well played','Nice one','Oops','Hold on a moment','Ready when you are'];
-const mpEsc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function mpApi(path,opts={}){
-  const r=await fetch(path,{ credentials:'same-origin', cache:'no-store', ...opts, headers:{ ...(opts.body?{ 'Content-Type':'application/json' }:{}), ...(opts.headers||{}) } });
-  let body=null; try{ body=await r.json(); }catch(_){}
-  if(!r.ok){ const e=new Error((body&&body.error)||('Request failed ('+r.status+')')); e.status=r.status; throw e; }
-  return body;
-}
-// ---- the site: are we on it, and who is signed in? ----
-async function mpDetect(){
-  if(location.protocol==='file:' || /claude\.ai$|claudeusercontent\.com$|github\.io$/.test(location.hostname)){ MP.platform=false; return; }
-  try{ const me=await mpApi('/api/platform/me'); MP.platform=true; MP.user=me&&me.user||null; }
-  catch(_){ MP.platform=false; MP.user=null; }
-}
-function mpPlayUrl(code){ return `${location.origin}/play/citadels-gate${code?'?join='+code:''}`; }
-function mpRoomsUrl(code){ const wss=location.protocol==='https:'?'wss':'ws'; return `${wss}://${location.host}/api/citadel/rooms/${code}/ws`; }
-function mpMenuMsg(text,tone){ const el=$('mpMsg'); if(!el) return; el.textContent=text||''; el.className='lnote mp-msg '+(tone||''); }
-function mpCleanCode(code){ return (code||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,5); }
-function mpCanPlay(){
-  if(MP.platform===null){ mpMenuMsg('Checking your sign-in…'); return false; }
-  if(!MP.platform){ mpMenuMsg('Online play runs on JAYKOBI GAMES (games.jaykobi.workers.dev).','bad'); return false; }
-  if(!MP.user){ mpMenuMsg('Sign in on JAYKOBI GAMES first, then come back to this page.','bad'); return false; }
-  return true;
-}
+function mpRoomsUrl(code){ if(MP.url) return MP.url.replace(/\/$/,'')+'/'+code; const wss=location.protocol==='https:'?'wss':'ws'; return `${wss}://${location.host}/rooms/${code}`; }
+function mpCode(){ const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<5;i++) s+=A[Math.floor(Math.random()*A.length)]; return s; }
+function mpSetName(n){ MP.name=n.trim().slice(0,24); try{ localStorage.setItem('cc-name',MP.name); }catch(_){} }
+function mpShareLink(code){ const u=new URL(location.href); u.hash='join-'+code; return u.toString(); }
 // ---- entry points ----
-async function mpCreate(snapshot){
-  if(!mpCanPlay()) return;
-  mpMenuMsg('Creating a room…');
-  try{ const { code }=await mpApi('/api/citadel/rooms/new',{ method:'POST', body:'{}' }); mpConnect(code,()=>({ cmd:setup.cmd, ...(snapshot?{ snapshot }:{}) })); mpMenuMsg(''); }
-  catch(e){ mpMenuMsg(e.message,'bad'); }
-}
-function mpJoin(code){
-  code=mpCleanCode(code); if(code.length<5){ mpMenuMsg('Enter the 5-letter room code.','bad'); return; }
-  if(!mpCanPlay()) return;
-  mpConnect(code,()=>({}));
-}
+function mpCreate(snapshot){ const code=mpCode(); mpConnect(code,{ name:MP.name||'Host', cmd:setup.cmd, snapshot:snapshot||null }); }
+function mpJoin(code){ code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5); if(code.length<5){ toast('Enter the 5-letter room code','bad'); return; } mpConnect(code,{ name:MP.name||'Guest', cmd:null }); }
 function mpConnect(code,hello){
+  if(!MP.url){ try{ MP.url=localStorage.getItem('cc-rooms')||null; }catch(_){} }
+  if(!MP.url && (location.protocol==='file:' || /claude\.ai$|github\.io$/.test(location.hostname))){ toast('Multiplayer runs on the game\'s own site, not in this preview','bad'); return; }
   NET_RESET(); NET.state='lobby'; NET.code=code; MP.hello=hello; MP.wsUrl=mpRoomsUrl(code);
-  try{ sessionStorage.setItem('cc-mp-room',code); }catch(_){}
   NET.onUi=mpEvent; NET.connectWs(MP.wsUrl,hello);
   mpShowLobby('Connecting…');
 }
-function mpLeave(){ NET.leave(); mpHideOverlay(); try{ sessionStorage.removeItem('cc-mp-room'); }catch(_){} if(S && !S.demo){ toMenu(); } renderMenu(); mpRefreshMenu(); }
+function mpLeave(){ NET.leave(); mpHideOverlay(); if(S && !S.demo){ toMenu(); } renderMenu(); }
 // ---- events from NET ----
 function mpEvent(ev,m){
   switch(ev){
     case 'connected': break;
-    case 'error': if(NET.state==='lobby' && !NET.room){ mpHideOverlay(); mpMenuMsg(m,'bad'); } else if(MP.overlayOn && NET.state==='lobby') mpShowLobby(m); else toast(m,'bad'); break;
-    case 'refused': mpHideOverlay(); NET.state='idle'; if(S && !S.demo && m.code!==4004) toMenu();
-      mpMenuMsg(m.code===4005?'This room is open in another tab.':m.code===4001?'Your sign-in expired. Sign in again on JAYKOBI GAMES.':(m.reason||'Could not join that room.'),'bad'); break;
+    case 'error': toast(m,'bad'); if(NET.state==='lobby'){ mpHideOverlay(); NET.leave(); } break;
     case 'room': MP.lastRoom=m; if(NET.state==='lobby' || !S || S.demo) mpShowLobby(); break;
     case 'start': mpStart(m); break;
     case 'go': mpHideOverlay(); break;
     case 'pause': mpShowPause(m); break;
     case 'peer': if(m.state==='away') mpShowPause({ reason:'away', seat:m.seat }); else if(m.state==='back') mpShowPause({ reason:'syncing' }); else if(m.state==='rematch') toast(`${mpPeerName()} wants a rematch`,'info'); break;
-    case 'resync': mpShowPause({ reason:'syncing' }); break;
+    case 'resync': if(NET.seat===0) mpShowPause({ reason:'syncing' }); break;
     case 'state': NET.applyState(m); setupHUD(); mpShowPause({ reason:'syncing' }); break;
     case 'resume': mpShowResume(m); break;
     case 'chat': mpChatBubble(m); break;
-    case 'over':
-      mpHideOverlay();
-      if(S && !S.demo && S.phase!=='over' && (m.reason==='forfeit'||m.reason==='left'||m.reason==='lost')){
-        S.phase='over'; S.winner=m.winner==null?-1:m.winner; S.endTime=S.t; S.overAt=performance.now()-2000; S.forfeit=m.reason!=='lost'; S.lost=m.reason==='lost'; }
-      break;
-    case 'dropped': if(NET.state==='lobby') mpShowLobby('Reconnecting…'); else mpShowPause({ reason:'self' }); break;
-    case 'closed': if(NET.state==='lobby'){ mpHideOverlay(); mpMenuMsg('Lost the connection to the room.','bad'); } break;
+    case 'over': if(m.reason==='forfeit'){ S.phase='over'; S.winner=m.winner; S.endTime=S.t; S.overAt=performance.now()-2000; S.forfeit=true; } break;
+    case 'dropped': mpShowPause({ reason:'self' }); break;
+    case 'closed': if(NET.state==='lobby'){ toast('Lost the connection to the room','bad'); mpHideOverlay(); } break;
   }
 }
 function mpPeerName(){ const r=MP.lastRoom; if(!r||!r.players) return 'Your opponent'; const p=r.players[1-NET.seat]; return p?p.name:'Your opponent'; }
@@ -2919,29 +2856,28 @@ function mpShowLobby(status){
   const myCmd=host?setup.cmd:(ps[me]&&ps[me].cmd)||null;
   const foeFaction=k=>COMMANDERS[k].faction==='covenant'?'forsaken':'covenant';
   // the guest picks from the faction the host isn't playing
-  const hostCmd=ps[0]&&ps[0].cmd; const pickFrom=host||me<0?null:(hostCmd?foeFaction(hostCmd):null);
-  const seat=(p,i)=>`<div class="mp-seat ${p?'':'empty'}">${p&&p.cmd?portraitImg(p.cmd,COMMANDERS[p.cmd].faction):'<div class="mp-ph"></div>'}<div><b>${p?mpEsc(p.name):(i===0?'Host':'Waiting for a friend…')}</b><small>${p&&p.cmd?COMMANDERS[p.cmd].name:(p?'Choosing a commander':'')}</small>${p?`<span class="mp-rdy ${p.ready?'on':''}">${p.away?'Away':p.ready?'Ready':'Not ready'}</span>`:''}</div></div>`;
+  const hostCmd=ps[0]&&ps[0].cmd; const pickFrom=host?null:(hostCmd?foeFaction(hostCmd):null);
+  const seat=(p,i)=>`<div class="mp-seat ${p?'':'empty'}">${p&&p.cmd?portraitImg(p.cmd,COMMANDERS[p.cmd].faction):'<div class="mp-ph"></div>'}<div><b>${p?p.name:(i===0?'Host':'Waiting for a friend…')}</b><small>${p&&p.cmd?COMMANDERS[p.cmd].name:(p?'Choosing a commander':'')}</small>${p?`<span class="mp-rdy ${p.ready?'on':''}">${p.ready?'Ready':'Not ready'}</span>`:''}</div></div>`;
   const picks=pickFrom?`<div class="mp-pick">${Object.entries(COMMANDERS).filter(([k,c])=>c.faction===pickFrom).map(([k,c])=>`<button class="mp-cmd ${k===myCmd?'on':''}" data-k="${k}">${portraitImg(k,c.faction)}<span>${c.short}</span></button>`).join('')}</div>`:'';
-  const canStart=host && ps[0] && ps[1] && ps[0].ready && ps[1].ready && !ps[1].away;
+  const canStart=host && ps[0] && ps[1] && ps[0].ready && ps[1].ready;
   hud.overlay.className='overlay mp'; hud.overlay.hidden=false; MP.overlayOn=true;
   hud.overlay.innerHTML=`<div class="card mp-card"><div class="eyebrow">Play a friend · Sylvanmere${r&&r.saved?' · resuming a saved match':''}</div>
-    <h1>Room ${mpEsc(NET.code||'')}</h1>
-    ${status?`<p class="mp-status">${mpEsc(status)}</p>`:''}
-    <div class="mp-code"><span>Share this code or link</span><b>${mpEsc(NET.code||'')}</b><button class="btn" id="mpCopy">Copy link</button>${navigator.share?'<button class="btn" id="mpShare">Share…</button>':''}</div>
+    <h1>Room ${NET.code||''}</h1>
+    ${status?`<p class="mp-status">${status}</p>`:''}
+    <div class="mp-code"><span>Share this code or link</span><b>${NET.code||''}</b><button class="btn" id="mpCopy">Copy link</button>${navigator.share?'<button class="btn" id="mpShare">Share…</button>':''}</div>
     <div class="mp-seats">${seat(ps[0],0)}${seat(ps[1],1)}</div>
     ${picks}
-    <div class="btns"><button class="btn ${ps[me]&&ps[me].ready?'':'primary'}" id="mpReady" ${myCmd&&me>=0?'':'disabled'}>${ps[me]&&ps[me].ready?'Not ready':'Ready'}</button>${host?`<button class="btn primary" id="mpStart" ${canStart?'':'disabled'}>Start battle</button>`:''}<button class="btn" id="mpLeave">Leave</button></div>
-    <p class="lnote">${host?'You pick first; your friend chooses from the other faction. Both press Ready, then you start.':'Pick a commander from the other faction, then press Ready.'} Your friend needs a JAYKOBI GAMES account.</p></div>`;
-  const link=mpPlayUrl(NET.code);
-  $('mpCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(link); $('mpCopy').textContent='Copied'; }catch(_){ prompt('Copy this link',link); } };
-  const sh=$('mpShare'); if(sh) sh.onclick=()=>navigator.share({ title:'Citadel\'s Gate', text:'Join my match: room '+NET.code, url:link }).catch(()=>{});
+    <div class="btns"><button class="btn ${ps[me]&&ps[me].ready?'':'primary'}" id="mpReady" ${myCmd?'':'disabled'}>${ps[me]&&ps[me].ready?'Not ready':'Ready'}</button>${host?`<button class="btn primary" id="mpStart" ${canStart?'':'disabled'}>Start battle</button>`:''}<button class="btn" id="mpLeave">Leave</button></div>
+    <p class="lnote">${host?'You pick first; your friend chooses from the other faction. Both press Ready, then you start.':'Pick a commander from the other faction, then press Ready.'}</p></div>`;
+  $('mpCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(mpShareLink(NET.code)); toast('Link copied','good'); }catch(_){ toast(mpShareLink(NET.code),'info'); } };
+  const sh=$('mpShare'); if(sh) sh.onclick=()=>navigator.share({ title:'Citadel\'s Gate', text:'Join my match: room '+NET.code, url:mpShareLink(NET.code) }).catch(()=>{});
   $('mpReady').onclick=()=>{ const on=!(ps[me]&&ps[me].ready); NET.ready(on,myCmd); };
-  const st=$('mpStart'); if(st) st.onclick=()=>{ NET.setSetup({ caps:setup.caps!==false }); NET.startMatch(); };
+  const st=$('mpStart'); if(st) st.onclick=()=>{ NET.setSetup({ diff:'regular', caps:setup.caps!==false }); NET.startMatch(); };
   $('mpLeave').onclick=mpLeave;
   for(const b of hud.overlay.querySelectorAll('.mp-cmd')) b.onclick=()=>{ NET.ready(false,b.dataset.k); };
 }
 function mpHideOverlay(){ if(MP.overlayOn){ hud.overlay.hidden=true; hud.overlay.className='overlay'; MP.overlayOn=false; } if(MP.cdTimer){ clearInterval(MP.cdTimer); MP.cdTimer=null; } }
-// ---- match start (also a refreshed player rebuilding a match in progress: m.rejoin, the state follows) ----
+// ---- match start ----
 function mpStart(m){
   const st={ faction:COMMANDERS[m.setup.cmd].faction, cmd:m.setup.cmd, foe:m.setup.foe, diff:'regular', caps:m.setup.caps!==false };
   // seat 1 plays as team 1 but sees the battle from its own side: the sim is symmetric, so we swap the local view
@@ -2949,21 +2885,19 @@ function mpStart(m){
   startMatch(st,{ seed:m.seed, noAI:true, foe:m.setup.foe });
   if(m.snapshot){ restoreState(m.snapshot,{ noAI:true }); setupHUD(); }
   S.net=true; S.speed=1;
-  if(m.rejoin) mpShowPause({ reason:'syncing' }); else mpShowPause({ reason:'countdown', secs:m.countdown||3 });
+  mpShowPause({ reason:'countdown', secs:m.countdown||3 });
 }
 // ---- pause / rejoin ----
 function mpShowPause(m){
-  if(!S || S.demo) return;
   const [a,b]=S.teams; hud.overlay.className='overlay mp'; hud.overlay.hidden=false; MP.overlayOn=true;
   let h='', btns='';
   if(m.reason==='countdown'){ h=`<h1>${a.cmd.short} vs ${b.cmd.short}</h1><p>Both armies are in place.</p><div class="count" id="count">${m.secs}</div>`; }
-  else if(m.reason==='away'||m.reason==='lag'){ h=`<h1>Paused</h1><p>${mpEsc(mpPeerName())} lost their connection. The match waits for them to come back.</p><div class="mp-wait" id="mpWait"></div>`; btns=`<button class="btn danger" id="mpForfeit" disabled>End match (win by forfeit)</button><button class="btn" id="mpQuit">Leave the match</button>`; }
+  else if(m.reason==='away'||m.reason==='lag'){ h=`<h1>Paused</h1><p>${mpPeerName()} lost their connection. The match waits for them to come back.</p><div class="mp-wait" id="mpWait"></div>`; btns=`<button class="btn danger" id="mpForfeit" disabled>End match (win by forfeit)</button><button class="btn" id="mpQuit">Leave the match</button>`; }
   else if(m.reason==='self'){ h=`<h1>Reconnecting…</h1><p>Your connection dropped. Hold on; you keep your seat for two minutes.</p>`; btns=`<button class="btn" id="mpQuit">Give up</button>`; }
-  else if(m.reason==='desync'){ h=`<h1>One moment</h1><p>The two copies of the battle drifted apart; syncing them.</p>`; }
-  else if(m.reason==='server'){ h=`<h1>One moment</h1><p>The room restarted. Picking the battle up where it was.</p>`; }
-  else { h=`<h1>Syncing…</h1><p>Bringing both players to the same moment.</p>`; }
+  else if(m.reason==='desync'){ h=`<h1>One moment</h1><p>The two copies of the battle drifted apart; syncing to the host.</p>`; }
+  else if(m.reason==='syncing'){ h=`<h1>Syncing…</h1><p>Bringing both players to the same moment.</p>`; }
   hud.overlay.innerHTML=`<div class="card mp-card">${mpVsRow()}${h}<div class="btns">${btns}</div></div>`;
-  const q=$('mpQuit'); if(q) q.onclick=()=>{ mpLeave(); };
+  const q=$('mpQuit'); if(q) q.onclick=()=>{ issueCmd({ k:'surrender', team:ME }); mpLeave(); };
   const f=$('mpForfeit'); if(f){ const t0=NET.awaySince||performance.now(), lim=NET.awayLimit||120000;
     if(MP.cdTimer) clearInterval(MP.cdTimer);
     const tick=()=>{ const left=Math.max(0,lim-(performance.now()-t0)); const w=$('mpWait'); if(w) w.textContent=left>0?`You can claim the win in ${Math.ceil(left/1000)} s`:'You can claim the win now'; if(left<=0){ f.disabled=false; } };
@@ -2974,53 +2908,14 @@ function mpVsRow(){ const [a,b]=S.teams; return `<div class="vs">${portraitImg(c
 // ---- stall indicator: when we're waiting on the other player's turns ----
 let mpStallT=0;
 netWaitUI.impl=function(n){ const w=NET.waiting; mpStallT=w?mpStallT+1:0; const el=$('mpStall'); if(!el) return; el.hidden=!(mpStallT>45 && NET.state==='play'); };
-// ---- quick chat (the room sends lines to the other player; ours is shown here) ----
+// ---- quick chat ----
 function mpChat(id){ NET.chat(id); mpChatBubble({ seat:NET.seat, id }); }
 function mpChatBubble(m){ const el=$('mpChatLog'); if(!el) return; const who=m.seat===NET.seat?'You':mpPeerName(); const d=document.createElement('div'); d.className='mp-bubble'+(m.seat===NET.seat?' me':''); d.textContent=`${who}: ${CHAT_LINES[m.id]||'…'}`; el.appendChild(d); while(el.children.length>4) el.removeChild(el.firstChild); setTimeout(()=>{ if(d.parentNode) d.remove(); },6000); if(m.seat!==NET.seat) snd('ui'); }
 function mpToggleChat(){ const p=$('mpChatMenu'); p.hidden=!p.hidden; }
-// ---- host saves: into the host's JAYKOBI GAMES account (one slot), on this device when that isn't possible ----
-function mpSaveData(){ return { meta:{ savedAt:Date.now(), code:NET.code, cmd:S.setup.cmd, foe:S.setup.foe, t:Math.round(S.t), version:'v18.1' }, snap:serializeState(), setup:S.setup }; }
-async function mpSave(){
-  if(NET.seat!==0) return;
-  const data=mpSaveData();
-  if(MP.platform && MP.user){
-    const put=rev=>mpApi(`/api/platform/saves/citadels-gate/${MP.slot}`,{ method:'PUT', body:JSON.stringify({ schemaVersion:1, expectedRevision:rev, data }) });
-    try{ const r=await put(MP.saveRev); MP.saveRev=r.revision; MP.cloudSave={ at:data.meta.savedAt }; toast('Match saved to your account','good'); return; }
-    catch(e){
-      if(e.status===409){
-        if(!confirm('Your account already holds a newer saved match (from another device or tab). Replace it with this one?')) return;
-        try{ const cur=await mpApi(`/api/platform/saves/citadels-gate/${MP.slot}`); const r=await put(cur.revision); MP.saveRev=r.revision; toast('Match saved to your account','good'); return; }catch(e2){ toast('Could not save: '+e2.message,'bad'); return; }
-      }
-      if(e.status!==401){ toast('Could not save: '+e.message,'bad'); return; }
-    }
-  }
-  try{ localStorage.setItem(MP.saveKey,JSON.stringify({ at:data.meta.savedAt, code:NET.code, snap:data.snap, setup:data.setup })); toast('Match saved on this device','good'); }catch(e){ toast('Could not save: '+e.message,'bad'); }
-}
-function mpLoadLocal(){ try{ return JSON.parse(localStorage.getItem(MP.saveKey)||'null'); }catch(_){ return null; } }
-async function mpLoadSave(){
-  if(MP.platform && MP.user){
-    try{ const r=await mpApi(`/api/platform/saves/citadels-gate/${MP.slot}`); MP.saveRev=r.revision; const d=r.data; return d&&d.snap?{ at:d.meta&&d.meta.savedAt||r.updatedAt, snap:d.snap, setup:d.setup, cloud:true }:null; }
-    catch(e){ if(e.status===404){ MP.saveRev=0; } else return mpLoadLocal(); }
-  }
-  return mpLoadLocal();
-}
-async function mpResumeSaved(){ const sv=await mpLoadSave(); if(!sv){ mpMenuMsg('No saved match found.','bad'); return; } setup.cmd=sv.setup.cmd; mpCreate(sv.snap); }
-// ---- the menu section: who you are, invite codes, the saved match ----
-async function mpRefreshMenu(){
-  if(MP.platform===null) await mpDetect();
-  const who=$('mpWho'); if(!who) return;
-  if(MP.platform && MP.user){ who.innerHTML=`Playing as <b>${mpEsc(MP.user.displayName||MP.user.handle||'you')}</b>`; }
-  else if(MP.platform){ who.innerHTML=`<a href="/account" target="_top">Sign in on JAYKOBI GAMES</a> to play a friend online. Single player needs no account.`; }
-  else who.textContent='Online play is available on JAYKOBI GAMES (games.jaykobi.workers.dev).';
-  const on=!!(MP.platform && MP.user); for(const id of ['mpCreate','mpJoinBtn']){ const b=$(id); if(b) b.disabled=!on; }
-  const b=$('mpResume'); if(b){ const sv=on?await mpLoadSave():null; b.hidden=!sv; if(sv){ b.textContent=`Resume saved match (${new Date(sv.at).toLocaleDateString()})`; b.onclick=()=>{ saveSetup(); mpResumeSaved(); }; } }
-}
-// invite links: /play/citadels-gate?join=ABCDE (the site passes ?join= to this page) prefill the code; joining is a tap
-function mpPrefillJoin(){
-  let code=''; try{ code=new URLSearchParams(location.search).get('join')||''; }catch(_){}
-  if(!code){ try{ code=sessionStorage.getItem('cc-mp-room')||''; }catch(_){} }
-  code=mpCleanCode(code); if(code.length===5){ $('mpCodeIn').value=code; mpMenuMsg(`Room ${code}: tap Join to enter.`); }
-}
+// ---- host saves (team 0 only; stored on this device) ----
+function mpSave(){ if(NET.seat!==0) return; try{ localStorage.setItem(MP.saveKey,JSON.stringify({ at:Date.now(), code:NET.code, snap:serializeState(), setup:S.setup })); toast('Match saved on this device','good'); }catch(e){ toast('Could not save: '+e.message,'bad'); } }
+function mpLoadSave(){ try{ return JSON.parse(localStorage.getItem(MP.saveKey)||'null'); }catch(_){ return null; } }
+function mpResumeSaved(){ const sv=mpLoadSave(); if(!sv) return; setup.cmd=sv.setup.cmd; mpCreate(sv.snap); }
 
 
 
@@ -6473,9 +6368,9 @@ function showEnd(){
   const row=(label,x,y)=>`<tr><td>${label}</td><td>${x}</td><td>${y}</td></tr>`;
   hud.overlay.innerHTML=`<div class="card"><div class="eyebrow">${MAP.name} · ${fmtTime(S.endTime)} · ${CONFIG.difficulty[S.setup.diff].label}</div>
     <div class="vs">${portraitImg(cmdKeyOf(a),a.faction.key+(win?'':' lost'))}<span>VS</span>${portraitImg(cmdKeyOf(b),b.faction.key+(win?' lost':''))}</div>
-    <h1>${S.lost?'Match ended':win?'Victory':'Defeat'}</h1>
+    <h1>${win?'Victory':'Defeat'}</h1>
     ${(()=>{ const L=LORE[cmdKeyOf(win?a:b)]; return L?`<p style="font-style:italic;color:var(--muted)">“${L.barks[2]}” — ${(win?a:b).cmd.short}</p>`:''; })()}
-    <p>${S.lost?'The connection to the match was lost and neither copy of the battle survived.':S.forfeit&&win?`${b.cmd.name} left the field. You win by forfeit.`:S.forfeit?`You left the battle; ${b.cmd.name} holds the field.`:win?`The ${b.faction.keep} has fallen. ${b.cmd.name} retreats.`:S.surrendered?`You surrendered to ${b.cmd.name}.`:`Your ${a.faction.keep} has fallen to ${b.cmd.name}.`}</p>
+    <p>${win?`The ${b.faction.keep} has fallen. ${b.cmd.name} retreats.`:S.surrendered?`You surrendered to ${b.cmd.name}.`:`Your ${a.faction.keep} has fallen to ${b.cmd.name}.`}</p>
     <table><tr><th></th><th>${a.cmd.short}</th><th>${b.cmd.short}</th></tr>
       ${row('Units deployed',a.stats.built,b.stats.built)}
       ${row('Units lost',a.stats.lost,b.stats.lost)}
@@ -6911,10 +6806,11 @@ function renderMenu(){
 $('mStart').onclick=()=>{ saveSetup(); startMatch({...setup}); };
 $('compass').onclick=()=>resetView();
 $('mLab').onclick=()=>openLab();
-$('mpCreate').onclick=()=>{ saveSetup(); mpCreate(); };
-$('mpJoinBtn').onclick=()=>{ mpJoin($('mpCodeIn').value); };
+$('mpName').value=MP.name; $('mpName').addEventListener('change',e=>mpSetName(e.target.value));
+$('mpCreate').onclick=()=>{ mpSetName($('mpName').value); saveSetup(); mpCreate(); };
+$('mpJoinBtn').onclick=()=>{ mpSetName($('mpName').value); mpJoin($('mpCodeIn').value); };
 $('mpCodeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('mpJoinBtn').click(); });
-mpPrefillJoin(); mpRefreshMenu();
+{ const sv=mpLoadSave(); const b=$('mpResume'); if(sv && b){ b.hidden=false; b.textContent=`Resume saved match (${new Date(sv.at).toLocaleDateString()})`; b.onclick=()=>{ mpSetName($('mpName').value); mpResumeSaved(); }; } }
 $('mpChatBtn').onclick=mpToggleChat;
 { const m=$('mpChatMenu'); CHAT_LINES.forEach((t,i)=>{ const b=document.createElement('button'); b.type='button'; b.textContent=t; b.onclick=()=>{ mpChat(i); m.hidden=true; }; m.appendChild(b); }); }
 $('labBack').onclick=()=>closeLab();
@@ -7076,7 +6972,7 @@ function applyHash(){ const toks=(location.hash||'').replace('#','').split('-'),
     for(const id of (only?[only]:ids)){ const u=thumbURL(id,c.faction,W,H), nm=(UNITS[id]||INF[id]).name; const cell=document.createElement('div'); cell.style.cssText='background:#2a2f3a;border-radius:6px;padding:4px;text-align:center'; cell.innerHTML=(u?`<img src="${u}" style="width:${W}px;height:${H}px;display:block">`:'')+`<div>${nm}</div>`; d.appendChild(cell); }
     document.body.appendChild(d); return; }
   { const tt=toks.find(t=>/^tod\d+$/.test(t)); if(tt){ TOD_OFF=+tt.slice(3); _todLast=-1; } }
-  { let j=toks.find(t=>/^join[A-Z]{5}$/i.test(t)); const ji=toks.indexOf('join'); if(!j && ji>=0 && /^[A-Z]{5}$/i.test(toks[ji+1]||'')) j='join'+toks[ji+1]; if(j && !NET.active){ $('mpCodeIn').value=j.slice(4).toUpperCase(); mpMenuMsg(`Room ${j.slice(4).toUpperCase()}: tap Join to enter.`); } }
+  { let j=toks.find(t=>/^join[A-Z0-9]{5}$/i.test(t)); const ji=toks.indexOf('join'); if(!j && ji>=0 && /^[A-Z0-9]{5}$/i.test(toks[ji+1]||'')) j='join'+toks[ji+1]; if(j && !NET.active){ $('mpCodeIn').value=j.slice(4).toUpperCase(); setTimeout(()=>{ if(!MP.name){ toast('Enter your name, then tap Join','info'); $('mpName').focus(); } else mpJoin(j.slice(4)); },400); } }   // v17.3 test: #tod11 = jump the light to minute 11
   if(renderer && has('lab') && !labOpen) openLab();
   else if((has('battle')||has('fast')) && S.demo){ startMatch({...setup}); if(has('fast')) S.speed=4; }
   else if(has('torchtest') && S.demo){ // v17.3 test bench: a torch-lit column in front of the camera at night
