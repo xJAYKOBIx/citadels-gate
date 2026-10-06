@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="cg-version" content="v19">
+<meta name="cg-version" content="v18.4">
 <title>Citadel's Gate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
 <style>
 /* One committed look: a dark war-table HUD over a snowy map. No light/dark split by design. */
 :root{
@@ -261,6 +261,17 @@ html.compact .fs span{inset:8px;}
 .lose h1{color:#f0707a;}
 
 /* ---------- setup menu ---------- */
+.menu{
+  position:fixed; inset:0; z-index:20; overflow-y:auto; touch-action:pan-y; -webkit-overflow-scrolling:touch;
+  background:linear-gradient(rgba(10,12,16,.45), rgba(10,12,16,.82));
+  padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+  display:grid; justify-items:center; align-content:start;
+}
+.menu-card{width:min(780px,100%); box-sizing:border-box; display:grid; gap:18px; background:var(--panel); border:1px solid var(--edge); border-radius:10px; padding:22px;}
+.menu h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(32px, 6vw, 48px); letter-spacing:.03em; line-height:1; text-wrap:balance;}
+.menu h1 .amp{color:var(--gold);}
+.menu .lede{margin:6px 0 0; color:var(--muted); font-size:16px; line-height:1.45; max-width:60ch;}
+.menu h2{margin:0 0 8px; font-family:var(--display); font-weight:500; font-size:13px; letter-spacing:.12em; color:var(--muted);}
 .seg{display:flex; flex-wrap:wrap; gap:6px;}
 .seg button{flex:1 1 auto; min-height:44px; padding:0 14px; font-weight:700; font-size:15px; background:rgba(239,230,210,.06); border:1px solid rgba(239,230,210,.2); border-radius:6px; cursor:pointer;}
 .seg button[aria-pressed="true"]{border-color:var(--gold); background:rgba(226,181,74,.15); color:var(--gold);}
@@ -417,179 +428,6 @@ html.side .mp-chatlog{left:auto; right:max(90px,env(safe-area-inset-right,0px));
 .start-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;}
 .start-row .sum{color:var(--muted); font-size:14px;}
 @media (max-width:520px){ .how dl{grid-template-columns:1fr;} .how dt{margin-top:6px;} }
-/* ---------- v19 title screen: the live battle at dusk behind a crest, a wordmark and a short menu ---------- */
-:root{ --title:"Cinzel","Alegreya SC",Georgia,serif; --ember:#d0532f; --stone:rgba(9,10,15,.84); --hair:linear-gradient(90deg,rgba(226,181,74,0),rgba(226,181,74,.55) 18%,rgba(226,181,74,.55) 82%,rgba(226,181,74,0)); }
-html.title #cv{visibility:hidden;}
-.menu.tscreen{position:fixed; inset:0; z-index:20; overflow:hidden; touch-action:none; background:none; padding:0; display:block;
-  --padx:max(20px, env(safe-area-inset-left,0px) + 16px, 5.5vw);}
-.t-fade{position:absolute; inset:0; background:#05060a; opacity:1; pointer-events:none;}
-.t-vig{position:absolute; inset:0; pointer-events:none;
-  background:
-    radial-gradient(120% 90% at 62% 52%, rgba(0,0,0,0) 45%, rgba(3,4,8,.55) 100%),
-    linear-gradient(90deg, rgba(5,6,11,.9) 0%, rgba(5,6,11,.62) 30%, rgba(5,6,11,0) 56%),
-    linear-gradient(0deg, rgba(5,6,11,.75) 0%, rgba(5,6,11,0) 22%);
-  transition:opacity .6s ease;}
-
-/* ---- the wordmark ---- */
-.t-col{position:absolute; left:var(--padx); top:max(7vh, env(safe-area-inset-top,0px) + 20px); bottom:max(10vh, env(safe-area-inset-bottom,0px) + 58px); width:min(560px, 46vw);
-  display:flex; flex-direction:column; justify-content:space-between; gap:3vh; pointer-events:none; transition:opacity .45s ease, transform .45s ease;}
-.t-col > *{pointer-events:auto;}
-.t-logo{position:relative; display:grid; justify-items:start; gap:0; pointer-events:none; flex:none;}
-.t-logo::before{content:''; position:absolute; inset:-12% -16%; background:radial-gradient(closest-side, rgba(5,6,11,.6), rgba(5,6,11,0)); z-index:-1; pointer-events:none;}
-.tscreen[data-screen="home"] .t-logo{animation:tLogoIn .9s cubic-bezier(.2,.7,.2,1) both;}
-@keyframes tLogoIn{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:none } }
-.t-emb{width:clamp(48px, min(7vw, 10vh), 96px); height:auto; margin:0 0 10px 2px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.6)) drop-shadow(0 0 18px rgba(255,150,70,.18));}
-.t-word{margin:0; display:grid; justify-items:start; line-height:.92; font-family:var(--title); font-weight:700;
-  font-size:clamp(48px, min(8.4vw, 12.5vh), 124px);}
-.t-word span{background:linear-gradient(180deg,#fbf0d2 0%,#efd08a 38%,#d9a446 62%,#9a6522 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
-  filter:drop-shadow(0 2px 0 rgba(0,0,0,.55)) drop-shadow(0 6px 18px rgba(0,0,0,.55));}
-.t-w1{font-size:.34em; letter-spacing:.36em; margin:0 0 .3em .06em; display:block; font-weight:600; white-space:nowrap;}
-.t-w1 i{font-style:normal; letter-spacing:0; font-size:.85em; padding:0 .55em 0 0;} .t-w1 i:last-child{padding:0 0 0 .2em;}
-.t-w2{letter-spacing:.12em; margin-left:-.04em;}
-.t-tag{margin:.9em 0 0 .2em; font-family:var(--display); font-size:clamp(13px, 1.25vw, 16px); letter-spacing:.24em; color:rgba(239,230,210,.72); text-transform:lowercase; font-variant:small-caps;
-  padding-top:.85em; position:relative;}
-.t-tag::before{content:''; position:absolute; left:0; top:0; width:min(260px, 80%); height:1px; background:linear-gradient(90deg,rgba(226,181,74,.7),rgba(226,181,74,0));}
-
-/* ---- opening card ---- */
-.t-enter{white-space:nowrap; position:absolute; left:50%; bottom:max(13vh, env(safe-area-inset-bottom,0px) + 64px); transform:translateX(-50%); background:none; border:0; cursor:pointer; padding:14px 26px;
-  font-family:var(--display); font-size:15px; letter-spacing:.34em; text-transform:uppercase; color:rgba(239,230,210,.86);}
-.t-enter span{animation:tBreathe 2.6s ease-in-out infinite;}
-.t-enter::before,.t-enter::after{content:''; position:absolute; top:50%; width:44px; height:1px; background:linear-gradient(90deg,rgba(226,181,74,0),rgba(226,181,74,.7));}
-.t-enter::before{right:100%;} .t-enter::after{left:100%; transform:scaleX(-1);}
-@keyframes tBreathe{ 0%,100%{opacity:.45} 50%{opacity:1} }
-.tscreen[data-screen="splash"] .t-col{left:0; right:0; top:0; bottom:0; width:auto; align-items:center; justify-content:center;}
-.tscreen[data-screen="splash"] .t-logo{transform:translateY(-5vh); justify-items:center; text-align:center;}
-.tscreen[data-screen="splash"] .t-nav{position:absolute; visibility:hidden;}
-.tscreen[data-screen="splash"] .t-word{justify-items:center; font-size:clamp(60px, 9vw, 128px);}
-.tscreen[data-screen="splash"] .t-tag::before{left:50%; transform:translateX(-50%); background:var(--hair);}
-.tscreen[data-screen="splash"] .t-emb{margin-left:0;}
-.tscreen[data-screen="splash"] .t-vig{background:radial-gradient(90% 80% at 50% 50%, rgba(5,6,11,.35) 0%, rgba(5,6,11,.8) 100%);}
-.tscreen:not([data-screen="splash"]) .t-enter{display:none;}
-.tscreen[data-screen="splash"] .t-foot .t-acct{opacity:0; pointer-events:none;}
-
-/* ---- the menu ---- */
-.t-nav{position:relative; display:grid; gap:2px; width:min(380px, 100%); flex:none;}
-.t-item{position:relative; display:grid; gap:1px; text-align:left; background:none; border:0; padding:min(8px, 1.1vh) 0 min(8px, 1.1vh) 30px; cursor:pointer; color:var(--text);
-  opacity:0; transform:translateX(-14px); transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);}
-.tscreen[data-screen="home"] .t-item{opacity:1; transform:none;}
-.tscreen[data-screen="home"] .t-item:nth-child(1){transition-delay:.15s} .tscreen[data-screen="home"] .t-item:nth-child(2){transition-delay:.21s}
-.tscreen[data-screen="home"] .t-item:nth-child(3){transition-delay:.27s} .tscreen[data-screen="home"] .t-item:nth-child(4){transition-delay:.33s}
-.tscreen[data-screen="home"] .t-item:nth-child(5){transition-delay:.39s} .tscreen[data-screen="home"] .t-item:nth-child(6){transition-delay:.45s}
-.t-k{font-family:var(--display); font-weight:500; font-size:clamp(19px, min(2.1vw, 3.6vh), 27px); letter-spacing:.07em; line-height:1.1; display:flex; align-items:center; gap:10px; color:rgba(239,230,210,.9); transition:color .2s, letter-spacing .3s;}
-.t-item.lead .t-k{font-size:clamp(23px, min(2.6vw, 4.4vh), 33px); font-weight:700; color:#fbf0d2;}
-.t-s{font-size:13.5px; color:rgba(239,230,210,.55); letter-spacing:.02em;}
-.t-item::before{content:''; position:absolute; left:6px; top:calc(min(8px, 1.1vh) + .62em); width:9px; height:9px; border:1.5px solid var(--gold); background:rgba(226,181,74,.25);
-  transform:rotate(45deg) scale(.2); opacity:0; transition:transform .25s, opacity .25s; box-shadow:0 0 10px rgba(255,170,80,.6);}
-.t-item.lead::before{top:calc(min(8px, 1.1vh) + .78em);}
-.t-item::after{content:''; position:absolute; left:30px; right:0; bottom:3px; height:1px; background:linear-gradient(90deg,rgba(226,181,74,.75),rgba(226,181,74,0)); transform:scaleX(0); transform-origin:left; transition:transform .35s ease;}
-.t-item:not(:disabled):is(:hover,:focus-visible) .t-k{color:var(--gold); letter-spacing:.09em;}
-.t-item:not(:disabled):is(:hover,:focus-visible)::before{transform:rotate(45deg) scale(1); opacity:1;}
-.t-item:not(:disabled):is(:hover,:focus-visible)::after{transform:scaleX(1);}
-.t-item:focus{outline:none;}
-.t-item.locked{cursor:default;} .t-item.locked .t-k{color:rgba(239,230,210,.38);} .t-item.locked .t-s{color:rgba(239,230,210,.3);}
-.t-lock{width:11px; height:13px; opacity:.8;}
-
-/* ---- footer ---- */
-.t-foot{position:absolute; left:var(--padx); right:var(--padx); bottom:max(14px, env(safe-area-inset-bottom,0px) + 8px); display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:13px; color:rgba(239,230,210,.55); pointer-events:none;}
-.t-foot > *{pointer-events:auto;}
-.t-acct{transition:opacity .5s;} .t-acct b{color:rgba(239,230,210,.85); font-weight:700;} .t-acct a{color:var(--gold);}
-.t-acct .dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:#6fcf7f; margin-right:7px; box-shadow:0 0 8px rgba(111,207,127,.7); vertical-align:1px;}
-.t-meta{display:flex; align-items:center; gap:12px; margin-left:auto;}
-.t-ver{font-family:var(--display); letter-spacing:.14em;}
-.t-ico{width:40px; height:40px; display:grid; place-items:center; border-radius:50%; border:1px solid rgba(239,230,210,.18); background:rgba(8,9,14,.4); color:rgba(239,230,210,.8); cursor:pointer;}
-.t-ico svg{width:20px; height:20px;}
-.t-ico .x{display:none;} .t-ico[data-v="off"] .x{display:block;} .t-ico[data-v="off"] .w1,.t-ico[data-v="off"] .w2,.t-ico[data-v="low"] .w2{display:none;}
-.t-ico:hover{color:var(--gold); border-color:rgba(226,181,74,.5);}
-
-/* ---- panels ---- */
-.t-panel{position:absolute; left:0; top:0; bottom:0; width:min(600px, 52vw); display:grid; grid-template-rows:auto 1fr auto; background:var(--stone);
-  -webkit-backdrop-filter:blur(8px) saturate(.9); backdrop-filter:blur(8px) saturate(.9);
-  box-shadow:24px 0 60px rgba(0,0,0,.45); animation:tIn .45s cubic-bezier(.2,.7,.2,1);
-  padding-left:env(safe-area-inset-left,0px);}
-.t-panel::after{content:''; position:absolute; top:0; bottom:0; right:0; width:1px; background:linear-gradient(180deg,rgba(226,181,74,0),rgba(226,181,74,.5) 20%,rgba(226,181,74,.5) 80%,rgba(226,181,74,0));}
-@keyframes tIn{ from{ transform:translateX(-30px); opacity:0 } to{ transform:none; opacity:1 } }
-.tscreen[data-screen^="p-"] .t-col{opacity:0; transform:translateX(-30px);} .tscreen[data-screen^="p-"] .t-col *{pointer-events:none;}
-.t-ph{display:flex; align-items:center; gap:14px; padding:max(20px, env(safe-area-inset-top,0px) + 14px) 26px 14px 22px; position:relative;}
-.t-ph::after{content:''; position:absolute; left:22px; right:26px; bottom:0; height:1px; background:var(--hair);}
-.t-ph h2{margin:2px 0 0; font-family:var(--title); font-weight:700; font-size:26px; letter-spacing:.08em; color:#f5e4b8; line-height:1.05;}
-.t-ph .eyebrow{font-size:11.5px; letter-spacing:.22em; color:rgba(239,230,210,.55);}
-.t-back{flex:none; width:44px; height:44px; border-radius:50%; border:1px solid rgba(226,181,74,.45); background:rgba(226,181,74,.06); color:var(--gold); font-size:28px; line-height:1; cursor:pointer; padding:0 0 3px;}
-.t-back:hover,.t-back:focus-visible{background:rgba(226,181,74,.16); outline:none;}
-.t-pb{overflow-y:auto; touch-action:pan-y; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:16px 26px 22px 22px; display:grid; gap:20px; align-content:start;}
-.t-pb h3{margin:0 0 9px; font-family:var(--display); font-weight:500; font-size:13px; letter-spacing:.18em; color:rgba(226,181,74,.85); text-transform:uppercase;}
-.t-pb .lede{margin:2px 0 0; color:rgba(239,230,210,.72); font-size:14.5px; line-height:1.5; max-width:62ch;}
-.t-mapname{margin:0; font-family:var(--title); font-size:20px; letter-spacing:.06em; color:#f5e4b8;}
-.t-pf{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 26px max(16px, env(safe-area-inset-bottom,0px) + 10px) 22px; position:relative; background:linear-gradient(0deg,rgba(5,6,10,.6),rgba(5,6,10,0));}
-.t-pf::before{content:''; position:absolute; left:22px; right:26px; top:0; height:1px; background:var(--hair);}
-.t-pf .sum{color:rgba(239,230,210,.7); font-size:14px; line-height:1.35;}
-.t-go{flex:none; min-height:52px; padding:0 30px; border-radius:4px; cursor:pointer; font-family:var(--title); font-weight:700; font-size:17px; letter-spacing:.14em; text-transform:uppercase;
-  color:#1d1206; border:1px solid #f3d58c; background:linear-gradient(180deg,#f6dc94 0%,#e2b54a 48%,#b9832e 100%);
-  box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 6px 22px rgba(226,140,50,.35), inset 0 1px 0 rgba(255,255,255,.5);}
-.t-go:hover,.t-go:focus-visible{filter:brightness(1.08); outline:none; box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 6px 30px rgba(255,150,60,.55), inset 0 1px 0 rgba(255,255,255,.5);}
-
-/* restyled controls inside panels */
-.t-panel .seg button{min-height:46px; border-radius:3px; background:rgba(239,230,210,.04); border:1px solid rgba(239,230,210,.16); font-family:var(--ui); letter-spacing:.02em; color:rgba(239,230,210,.85);}
-.t-panel .seg button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(226,181,74,.22),rgba(226,181,74,.08)); border-color:rgba(226,181,74,.8); color:#f8e2a6; box-shadow:inset 0 0 0 1px rgba(226,181,74,.2);}
-.t-sides button{min-height:56px!important; font-family:var(--title)!important; font-size:17px!important; letter-spacing:.14em!important; text-transform:uppercase;}
-.t-sides button:first-child{border-left:3px solid #3a78e0!important;} .t-sides button:last-child{border-left:3px solid #c23a44!important;}
-.t-panel .cmds{grid-template-columns:1fr;}
-.t-panel .cmd{border-radius:4px; background:linear-gradient(90deg,rgba(239,230,210,.05),rgba(239,230,210,.02)); border:1px solid rgba(239,230,210,.12); padding:14px;}
-.t-panel .cmd[aria-pressed="true"]{border-color:rgba(226,181,74,.75); background:linear-gradient(90deg,rgba(226,181,74,.16),rgba(226,181,74,.03)); box-shadow:inset 3px 0 0 var(--gold);}
-.t-panel .cmd .cn{font-family:var(--title); letter-spacing:.04em; font-size:18px; color:#f5e4b8;}
-.t-panel .btn{border-radius:3px; letter-spacing:.03em;}
-.t-panel .btn.primary{background:linear-gradient(180deg,#f6dc94,#e2b54a 50%,#b9832e); border-color:#f3d58c; color:#1d1206;}
-.t-card{border:1px solid rgba(239,230,210,.12); background:rgba(239,230,210,.03); border-radius:4px; padding:14px 16px;}
-.t-card .lnote{margin:0 0 12px; font-size:13.5px; line-height:1.45;}
-.t-who{margin:0; font-size:15px; color:rgba(239,230,210,.8);} .t-who b{color:#f5e4b8;} .t-who a{color:var(--gold);}
-.t-panel .how{border:0; padding-top:16px;}
-.t-panel .how dl{grid-template-columns:1fr; gap:4px; margin:0;}
-.t-panel .how dt{font-family:var(--display); letter-spacing:.12em; text-transform:uppercase; font-size:12.5px; margin-top:12px; color:rgba(226,181,74,.9);}
-.t-panel .how dd{color:rgba(239,230,210,.82); font-size:14.5px; line-height:1.5;}
-
-/* ---- portrait: crest on top, menu at the bottom, panels as a sheet ---- */
-@media (orientation:portrait), (max-aspect-ratio:1/1){
-  .t-vig{background:linear-gradient(180deg, rgba(5,6,11,.82) 0%, rgba(5,6,11,.3) 28%, rgba(5,6,11,0) 42%, rgba(5,6,11,.62) 58%, rgba(5,6,11,.95) 82%);}
-  .t-col{left:16px; right:16px; width:auto; top:max(5vh, env(safe-area-inset-top,0px) + 14px); bottom:max(64px, env(safe-area-inset-bottom,0px) + 56px); align-items:center;}
-  .t-logo{justify-items:center; text-align:center;}
-  .t-word{justify-items:center; font-size:clamp(56px, 19vw, 100px);}
-  .t-tag{letter-spacing:.16em; font-size:12.5px; white-space:nowrap;}
-  .tscreen[data-screen^="p-"] .t-foot{opacity:0; pointer-events:none;} .tscreen[data-screen^="p-"] .t-foot *{pointer-events:none;}
-  .t-tag::before{left:50%; transform:translateX(-50%); background:var(--hair);}
-  .t-emb{margin:0 0 8px; width:clamp(52px, 14vw, 72px);}
-  .tscreen[data-screen="splash"] .t-logo{transform:translateY(-6vh);}
-  .tscreen[data-screen="splash"] .t-word{font-size:clamp(52px, 17vw, 96px);}
-  .t-nav{width:min(360px, 100%); justify-items:center;}
-  .t-item{padding:7px 30px; text-align:center; justify-items:center; transform:translateY(10px);}
-  .t-item::before{left:2px;} .t-item.lead::before{left:2px;}
-  .t-item::after{left:30px; right:30px; background:var(--hair); transform-origin:center;}
-  .t-item .t-s{display:none;} .t-item.lead .t-s,.t-item.locked .t-s{display:block;}
-  .t-item.locked .t-s{display:none;}
-  .t-panel{left:0; right:0; top:auto; width:auto; max-height:88vh; max-height:88dvh; border-radius:16px 16px 0 0; animation-name:tUp; box-shadow:0 -20px 60px rgba(0,0,0,.5); padding-left:0;}
-  .t-panel::after{left:0; right:0; top:0; bottom:auto; width:auto; height:1px; background:var(--hair);}
-  .t-ph{padding:16px 18px 12px;} .t-pb{padding:14px 18px 20px;} .t-pf{padding:12px 18px max(14px, env(safe-area-inset-bottom,0px) + 8px);}
-  .t-ph::after,.t-pf::before{left:18px; right:18px;}
-  .t-pf{flex-wrap:wrap;} .t-pf .sum{flex:1 1 100%; font-size:13px;} .t-go{flex:1 1 100%;}
-  @keyframes tUp{ from{ transform:translateY(40px); opacity:0 } to{ transform:none; opacity:1 } }
-}
-/* short landscape phones */
-@media (orientation:landscape) and (max-height:520px){
-  .t-col{top:max(12px, env(safe-area-inset-top,0px) + 8px); bottom:max(42px, env(safe-area-inset-bottom,0px) + 38px); gap:8px;}
-  .t-emb{display:none;}
-  .t-word{font-size:clamp(38px, 11vh, 56px);}
-  .t-tag{margin-top:.6em; padding-top:.6em; font-size:12px;}
-  .t-nav{gap:0;}
-  .t-item{padding:4px 0 4px 26px;} .t-item .t-s{display:none;}
-  .t-k{font-size:19px;} .t-item.lead .t-k{font-size:23px;}
-  .t-item::before{top:calc(4px + .6em);} .t-item.lead::before{top:calc(4px + .7em);}
-  .t-foot{bottom:max(8px, env(safe-area-inset-bottom,0px) + 4px);}
-  .t-ico{width:34px; height:34px;}
-  .tscreen[data-screen="splash"] .t-word{font-size:clamp(46px, 16vh, 76px);}
-  .tscreen[data-screen="splash"] .t-enter{bottom:16px;}
-  .t-panel{width:min(560px, 62vw);}
-  .t-ph{padding-top:max(10px, env(safe-area-inset-top,0px) + 6px); padding-bottom:10px;} .t-ph h2{font-size:21px;}
-}
-@media (orientation:landscape) and (max-height:760px){ .t-item:not(.lead) .t-s{display:none;} }
-@media (prefers-reduced-motion:reduce){ .t-item,.t-logo,.t-panel{transition:none!important; animation:none!important;} .t-enter span{animation:none;} }
 </style>
 </head>
 <body>
@@ -653,109 +491,47 @@ html.title #cv{visibility:hidden;}
   </section>
 </div>
 
-<div class="menu tscreen" id="menu" data-screen="splash">
-  <div class="t-fade" id="tFade" aria-hidden="true"></div>
-  <div class="t-vig" aria-hidden="true"></div>
-
-  <div class="t-col">
-  <!-- the crest and wordmark, shared by the opening card and the home screen -->
-  <header class="t-logo" id="tLogo">
-    <svg class="t-emb" viewBox="0 0 120 92" aria-hidden="true">
-      <defs><linearGradient id="tEmbG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7e4b0"/><stop offset=".6" stop-color="#e2b54a"/><stop offset="1" stop-color="#9c6a24"/></linearGradient></defs>
-      <g fill="none" stroke="url(#tEmbG)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
-        <path d="M60 3v26M52 11h16"/>
-        <path d="M12 86V36h6v-6h5v6h5v-6h5v6h6v50"/>
-        <path d="M81 86V36h6v-6h5v6h5v-6h5v6h6v50"/>
-        <path d="M39 86V48h5v-5h5v5h5v-5h12v5h5v-5h5v5h5v38"/>
-        <path d="M48 86V67a12 12 0 0 1 24 0v19"/>
-        <path d="M54 86V59.6M60 86V55M66 86V59.6M48 72h24M48 79h24" stroke-width="1.7"/>
-        <path d="M4 86h112"/>
-      </g>
-    </svg>
-    <h1 class="t-word"><span class="t-w1"><i aria-hidden="true">†</i>Citadel’s<i aria-hidden="true">†</i></span><span class="t-w2">Gate</span></h1>
-    <p class="t-tag">Hold the gate. Break theirs.</p>
-  </header>
-
-  <!-- home: the main menu -->
-  <nav class="t-nav" id="tNav" aria-label="Main menu">
-    <button class="t-item lead" type="button" id="mResume" hidden><span class="t-k">Resume battle</span><span class="t-s" id="mResumeSub"></span></button>
-    <button class="t-item lead" type="button" data-go="skirmish"><span class="t-k">Skirmish</span><span class="t-s">Battle the AI on Sylvanmere</span></button>
-    <button class="t-item" type="button" data-go="online"><span class="t-k">Play a friend</span><span class="t-s" id="tOnlineSub">Online, with a room code</span></button>
-    <button class="t-item locked" type="button" disabled><span class="t-k">Campaign <svg class="t-lock" viewBox="0 0 12 14" aria-hidden="true"><path d="M3 6V4a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="6" width="9" height="7" rx="1.2" fill="currentColor"/></svg></span><span class="t-s">Coming in a later update</span></button>
-    <button class="t-item" type="button" data-go="library"><span class="t-k">Library</span><span class="t-s">Commanders, units and lore</span></button>
-    <button class="t-item" type="button" data-go="howto"><span class="t-k">How to play</span></button>
-    <button class="t-item" type="button" data-go="settings"><span class="t-k">Settings</span></button>
-  </nav>
-  </div>
-
-  <!-- opening card: the first tap also wakes the sound -->
-  <button class="t-enter" id="tEnter" type="button"><span id="tEnterTxt">Tap to begin</span></button>
-
-  <!-- panels -->
-  <section class="t-panel" id="tpSkirmish" data-panel="skirmish" aria-labelledby="tpSkH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow" id="mEyebrow">Skirmish · Sylvanmere</div><h2 id="tpSkH">Skirmish</h2></div></div>
-    <div class="t-pb">
-      <section class="t-field"><h3>Battlefield</h3><p class="t-mapname">Sylvanmere</p><p class="lede"></p><div class="cmds maps" id="mMap" hidden></div></section>
-      <section><h3>Your side</h3><div class="seg t-sides" id="mFaction"></div></section>
-      <section><h3>Commander</h3><div class="cmds" id="mCmd"></div></section>
-      <section><h3>Opponent</h3><div class="seg" id="mFoe"></div></section>
-      <div class="row2">
-        <section><h3>Difficulty</h3><div class="seg" id="mDiff"></div></section>
-        <section><h3>Unit caps</h3><div class="seg" id="mCaps"></div></section>
-      </div>
+<div class="menu" id="menu">
+  <div class="menu-card">
+    <div>
+      <div class="eyebrow" id="mEyebrow">Skirmish · Frostmere Crossing</div>
+      <h1>Citadel's Gate</h1>
+      <p class="lede">Lead one side of a winter war across a frozen river. Wave infantry march the two outer lanes on their own; the middle lane is yours to fill with gold. You spend gold on everything else, draw their paths, seize the high ground, and break both towers in any lane to expose the enemy stronghold.</p>
     </div>
-    <div class="t-pf"><span class="sum" id="mSum"></span><button class="t-go" id="mStart" type="button">Begin battle</button></div>
-  </section>
-
-  <section class="t-panel" id="tpOnline" data-panel="online" aria-labelledby="tpOnH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Online · 1 v 1</div><h2 id="tpOnH">Play a friend</h2></div></div>
-    <div class="t-pb mp-menu">
-      <p class="t-who mp-who" id="mpWho">Checking your sign-in…</p>
-      <section class="t-card"><h3>Host a battle</h3><p class="lnote">You get a five-letter code and a link to send. You'll both choose commanders in the room; your friend leads the other faction.</p>
-        <div class="mp-row"><button class="btn primary" id="mpCreate" disabled>Create a room</button><button class="btn" id="mpResume" hidden>Resume saved match</button></div></section>
-      <section class="t-card"><h3>Join a battle</h3>
-        <div class="mp-row"><input id="mpCodeIn" class="mp-in code" maxlength="5" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Room code"><button class="btn" id="mpJoinBtn" disabled>Join</button></div>
-        <p class="lnote mp-msg" id="mpMsg" role="status"></p></section>
-      <p class="lnote">Both players need a JAYKOBI GAMES account. If a connection drops, the battle pauses and picks up again when the player returns.</p>
+    <section><h2>Battlefield</h2><div class="cmds maps" id="mMap"></div></section>
+    <section><h2>Your side</h2><div class="seg" id="mFaction"></div></section>
+    <section><h2>Commander</h2><div class="cmds" id="mCmd"></div></section>
+    <section><h2>Opponent</h2><div class="seg" id="mFoe"></div></section>
+    <div class="row2">
+      <section><h2>Difficulty</h2><div class="seg" id="mDiff"></div></section>
+      <section><h2>Unit caps</h2><div class="seg" id="mCaps"></div></section>
+      <section><h2>Graphics</h2><div class="seg" id="mGfx"></div></section>
     </div>
-  </section>
-
-  <section class="t-panel" id="tpSettings" data-panel="settings" aria-labelledby="tpSeH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Options</div><h2 id="tpSeH">Settings</h2></div></div>
-    <div class="t-pb">
-      <section><h3>Graphics</h3><div class="seg" id="mGfx"></div><p class="lnote">Low turns off shadows and some effects. Use it if a phone runs hot.</p></section>
-      <section><h3>Sound</h3><div class="seg" id="tSndSeg"></div></section>
-      <section><h3>Frame rate</h3><div class="seg" id="tFpsSeg"></div><p class="lnote">30 saves battery and keeps phones cooler.</p></section>
-      <section><h3>Time of day in battle</h3><div class="seg" id="tTodSeg"></div><p class="lnote">Cycle runs from daylight to golden hour, night and dawn over a long battle. Looks only.</p></section>
-      <section><h3>Torches and lanterns</h3><div class="seg" id="tTorchSeg"></div></section>
-      <section><h3>Screen</h3><div class="seg"><button class="btn" id="mFs" type="button" hidden>Fullscreen</button></div></section>
-    </div>
-  </section>
-
-  <section class="t-panel" id="tpHowto" data-panel="howto" aria-labelledby="tpHoH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Field manual</div><h2 id="tpHoH">How to play</h2></div></div>
-    <div class="t-pb how" id="how">
+    <section class="mp-menu"><h2>Play a friend</h2>
+      <p class="lnote mp-who" id="mpWho">Checking your sign-in…</p>
+      <div class="mp-row"><button class="btn primary" id="mpCreate" disabled>Create a room</button><button class="btn" id="mpResume" hidden>Resume saved match</button></div>
+      <div class="mp-row"><input id="mpCodeIn" class="mp-in code" maxlength="5" placeholder="ROOM CODE" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn" id="mpJoinBtn" disabled>Join</button></div>
+      <p class="lnote mp-msg" id="mpMsg" role="status"></p>
+      <p class="lnote">Pick your commander above first. Your friend joins with the code or the link and plays the other faction. Both of you need a JAYKOBI GAMES account.</p></section>
+    <div class="start-row"><span class="sum" id="mSum"></span><span class="btns" style="margin:0"><button class="btn" id="mFs" hidden>Fullscreen</button><button class="btn" id="mLab">Library</button><button class="btn" id="mResume" hidden>Resume battle</button><button class="btn primary" id="mStart">Start battle</button></span></div>
+    <details class="how" id="how">
+      <summary>How to play</summary>
       <dl>
         <dt>Deploy</dt><dd>Tap a card in the Grimoire, then tap the map (or drag the card there). Every unit marches out of your keep's gate (flyers lift off the keep) at double speed until it clears the blue circle around your stronghold. Drop inside the circle and it goes to that spot; anywhere else: fighters dropped on a lane march that lane, casters, caravans and anti-air walk to the spot and hold it, and flyers fly there and circle.</dd>
         <dt>Command</dt><dd>Press on one of your units and drag to draw its path. Release to send it. Close the loop to make it patrol. End on an enemy to attack it.</dd>
         <dt>Flyers</dt><dd>Flyers never stop. Draw their path across enemy ground to strafe or breathe fire along it; without orders they circle and chase nearby flyers.</dd>
-        <dt>Lanes</dt><dd>Wave infantry march both lanes on their own. Fighting units dropped on a lane march it automatically, and so does any unit you walk back onto a lane. Units left off the lane hold their ground until you give them a path.</dd>
-        <dt>Hidden paths</dt><dd>On Sylvanmere a hidden path leaves each of your lanes, slips through the woods to the Hidden Ford and comes out on the enemy's far lane. Draw a path along one to strike where they aren't looking.</dd>
+        <dt>Lanes</dt><dd>Wave infantry march the two outer lanes on their own; the middle lane only gets what you buy. Fighting units dropped on a lane march it automatically, and so does any unit you walk back onto a lane. Units left off the lane hold their ground until you give them a path.</dd>
         <dt>Gold</dt><dd>Gold fills on its own up to 30 and stops when full, so keep spending. Relic caches appear on the rune circles; move a ground unit onto one for 10–25 gold.</dd>
         <dt>Ranks</dt><dd>You start at Rank I with the scout and the front line. Break the Rank II seal (12 gold) for spawners, flyers and casters, then the Rank III seal (25 gold) and the Rank IV seal (28 gold) for much stronger units. You can field up to 4 of each Rank I–II unit, 2 of each Rank III and 1 of each Rank IV at a time.</dd>
-        <dt>High ground</dt><dd>Units on higher ground shoot 20% farther and hit 25% harder, and units below can't target them unless they come close. Casters and flyers ignore height. Each lane has a nest above it for your mages.</dd>
+        <dt>High ground</dt><dd>Units on higher ground shoot 20% farther and hit 25% harder, and units below can't target them unless they come close. Casters and flyers ignore height. On Frostmere the hills are climbed by their ramps. On Thornspire Pass bare rock can't be climbed at all: roads and stairs are the only ways up, and the stairs lead to the Hawk Ridge and Wolf Ledge lookouts.</dd>
+        <dt>Bridges and tunnels</dt><dd>On Thornspire Pass, Kingsbridge carries the middle road high over the gorge, and a tunnel through Greyspine links the north saddle with Hawk Ridge. Units in a tunnel can't be seen or hit until they come out. The gorge floor is a hidden path between the two low crossings, with a stair up to the middle road. Draw a path across any of them and your unit will use it.</dd>
         <dt>Reading the field</dt><dd>Zoom out and every fighting unit shows a badge with its portrait, a ring in its side's colour and a health ring when hurt. Gold pips mark Rank III and IV units.</dd>
         <dt>Power</dt><dd>Your commander's strike (24 gold, 60 s cooldown) hits anywhere on the map. Tap it, then tap a target.</dd>
         <dt>Camera</dt><dd>On a phone or tablet, hold it sideways like a controller: the view always faces the enemy stronghold, drag to pan and pinch to zoom. Zooming out lifts the camera high over the whole field; zooming in drops it down among the troops. Double-tap to switch between the whole field and a close view, and tap the minimap to jump. With a mouse: drag to pan, scroll to zoom, right-drag to turn and tilt (or Q/E and Z/X), C to reset.</dd>
       </dl>
       <p>Counters matter: flyers shred infantry and caravans, anti-air shreds flyers, casters punish clumps from out of tower range, scouts kill unguarded casters, cannons and beetles kill armor.</p>
-    </div>
-  </section>
-
-  <footer class="t-foot">
-    <span class="t-acct" id="tWho"></span>
-    <span class="t-meta"><button class="t-ico" id="tSnd" type="button" aria-label="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w1" d="M16 9.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="x" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="t-ver" id="tVer">v19</span></span>
-  </footer>
+    </details>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3128,7 +2904,7 @@ function mpConnect(code,hello){
   NET.onUi=mpEvent; NET.connectWs(MP.wsUrl,hello);
   mpShowLobby('Connecting…');
 }
-function mpLeave(){ NET.leave(); mpHideOverlay(); try{ sessionStorage.removeItem('cc-mp-room'); }catch(_){} if(S && !S.demo){ toMenu('p-online'); } renderMenu(); mpRefreshMenu(); }
+function mpLeave(){ NET.leave(); mpHideOverlay(); try{ sessionStorage.removeItem('cc-mp-room'); }catch(_){} if(S && !S.demo){ toMenu(); } renderMenu(); mpRefreshMenu(); }
 // ---- events from NET ----
 function mpEvent(ev,m){
   switch(ev){
@@ -5049,13 +4825,11 @@ function blendLights(w){
   out.pos=[0,1,2].map(j=>P.reduce((a,p,i)=>a+p.pos[j]*w[i],0));
   return out;
 }
-function todMode(){ if(TITLE.on && S && S.demo && !labOpen) return 'title'; return (S && !S.demo && !labOpen && STYLE.tod==='cycle')?'cycle':(STYLE.tod==='cycle'?'day':STYLE.tod); }
+function todMode(){ return (S && !S.demo && !labOpen && STYLE.tod==='cycle')?'cycle':(STYLE.tod==='cycle'?'day':STYLE.tod); }
 function LK(){ const i=TOD_W.indexOf(Math.max(...TOD_W)); return ['day','golden','moon','golden'][i]; }   // nearest preset, for the discrete look switches
 var _todLast=-1;
 function updateDayNight(){
   const mode=todMode();
-  if(mode==='title'){ TOD_W=[0,0,0,0]; NIGHT=TITLE.night; if(_todLast!=='title'){ _todLast='title'; CUR_L=TITLE_L; applyWorldLight(); titleSky(); } return; }
-  if(TITLE.sky && TITLE.sky.visible){ TITLE.sky.visible=false; TITLE.ring.visible=false; }
   TOD_W=mode==='cycle'?todWeights((S.t||0)/60+TOD_OFF):mode==='golden'?[0,1,0,0]:mode==='moon'?[0,0,1,0]:[1,0,0,0];
   NIGHT=TOD_W.reduce((a,v,i)=>a+v*TOD_DARK[i],0);
   const sig=TOD_W.map(v=>v.toFixed(3)).join();
@@ -5841,60 +5615,7 @@ function animOf(e,x,y,s,air,dt){
 }
 
 // ---------- camera ----------
-/* ---------- title screen camera: a slow cinematic drift over the live demo battle ---------- */
-const TITLE={ on:true, t:0, night:.62, over:null, fov:38, sky:null };
-// the title screen's own dusk: a low ember sun behind the enemy's woods, cool blue shadows, torches lit
-const TITLE_L={ sky:0x5a6aa8, ground:0x1c1820, hi:.62, sun:0xff9750, si:1.25, pos:[1900,380,-500], clear:0x0b0d16, water:0x34506c, fire:1.5, snow:.55,
-  fog:0x3a3247, fogNear:700, fogFar:3300, fill:0x4a58a0, fi:.32, grade:'' };
-function titleSky(){
-  if(!renderer) return;
-  if(!TITLE.sky){
-    const geo=new THREE.SphereGeometry(9000,32,16);
-    const mat=new THREE.ShaderMaterial({ side:THREE.BackSide, depthWrite:false, fog:false,
-      uniforms:{ sunDir:{value:new THREE.Vector3(1,.08,-.25).normalize()}, hor:{value:new THREE.Color(0x3a3247)}, zen:{value:new THREE.Color(0x0a0e1e)}, ember:{value:new THREE.Color(0xff8a3c)}, gold:{value:new THREE.Color(0xffd08a)} },
-      vertexShader:'varying vec3 vD; void main(){ vD=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-      fragmentShader:'uniform vec3 sunDir,hor,zen,ember,gold; varying vec3 vD; void main(){ float h=vD.y; vec3 c=mix(hor,zen,smoothstep(-.02,.55,h)); float s=max(dot(normalize(vD),sunDir),0.0); float band=exp(-abs(h-.02)*9.0); c+=ember*pow(s,6.0)*band*.85+gold*pow(s,60.0)*.6+ember*.12*band; gl_FragColor=vec4(c,1.0); }' });
-    TITLE.sky=new THREE.Mesh(geo,mat); TITLE.sky.renderOrder=-10; TITLE.sky.frustumCulled=false; scene.add(TITLE.sky);
-    // a ring of dark hills and treeline beyond the board's edge, so the low shots meet a horizon instead of the table
-    const R=mulberryTitle(7), cone=new THREE.ConeGeometry(1,1,7); cone.translate(0,.5,0);
-    const m2=new THREE.MeshLambertMaterial({ color:0x1b1d26, flatShading:true });
-    const N=90, ring=new THREE.InstancedMesh(cone,m2,N), dm=new THREE.Object3D();
-    for(let i=0;i<N;i++){ const far=true, a=(i/N)*TAU+R()*.05, dd=1900+R()*1300, rx=MW/2+dd, ry=MH/2+dd;
-      const h=far?300+R()*520:110+R()*160, w=far?Math.min(dd*.85,h*(.9+R()*.4)):h*.35;
-      dm.position.set(CX+Math.cos(a)*rx,-10,CY+Math.sin(a)*ry); dm.scale.set(w,h,w); dm.rotation.set(0,R()*6,0); dm.updateMatrix(); ring.setMatrixAt(i,dm.matrix); }
-    TITLE.ring=ring; scene.add(ring);
-  }
-  TITLE.sky.visible=true; TITLE.ring.visible=true;
-}
-function mulberryTitle(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-window.__TITLE=TITLE;
-// three slow shots, each a gentle dolly; a dip to dark between them. Landscape keeps the subject right of the menu.
-const TITLE_SHOTS=[
-  { p0:[-70,1200,205], p1:[-70,1020,220], t0:[760,1110,95], t1:[760,1090,100], fov:38 },          // our keep against the sunset, the enemy spire on the horizon
-  { p0:[780,1270,128], p1:[700,1215,112], t0:[330,1095,78], t1:[330,1090,74], fov:40 },         // the gate itself, lit by the low sun, troops marching out
-  { p0:[560,1330,330], p1:[760,1280,300], t0:[2470,1100,70], t1:[2470,1100,60], fov:34 },       // over the woods toward their citadel
-];
-const TITLE_DUR=17, TITLE_FADE=1.3;
-function titleCam(dt){
-  TITLE.t+=dt||0;
-  let v=TITLE.over;
-  if(v && typeof v==='function') v=v(TITLE.t);
-  if(!v){
-    const n=TITLE_SHOTS.length, k=Math.floor(TITLE.t/TITLE_DUR), u=(TITLE.t%TITLE_DUR)/TITLE_DUR, sh=TITLE_SHOTS[k%n], e=u*u*(3-2*u)*.6+u*.4;
-    const L=(a,b)=>a.map((x,i)=>x+(b[i]-x)*e), p=L(sh.p0,sh.p1), t=L(sh.t0,sh.t1);
-    const land=view.w>view.h*1.15;
-    if(land){ const fx=t[0]-p[0], fy=t[1]-p[1], fl=Math.hypot(fx,fy)||1, d=Math.hypot(fx,fy), k2=d*.26; t[0]-=(-fy/fl)*k2; t[1]-=(fx/fl)*k2; }  // swing the view so the subject sits right of the menu
-    v={ p, t, fov:sh.fov+(land?0:8) };
-    const fe=$('tFade'); if(fe){ const tt=TITLE.t%TITLE_DUR, a=tt<TITLE_FADE?1-tt/TITLE_FADE:tt>TITLE_DUR-TITLE_FADE?(tt-(TITLE_DUR-TITLE_FADE))/TITLE_FADE:0; fe.style.opacity=(TITLE.t<TITLE_FADE?1-TITLE.t/TITLE_FADE:a).toFixed(3); }
-  }
-  camera.fov=v.fov||TITLE.fov; camera.updateProjectionMatrix();
-  camera.position.set(v.p[0],v.p[2],v.p[1]); camera.lookAt(v.t[0],v.t[2],v.t[1]);
-  if(TITLE.sky) TITLE.sky.position.copy(camera.position);
-  cam.x=v.t[0]; cam.y=v.t[1]; camera.updateMatrixWorld();
-}
 function updateCamera(dt){
-  if(TITLE.on && S && S.demo && camera && !labOpen){ if(!TITLE.active){ TITLE.active=true; document.documentElement.classList.add('title'); } titleCam(dt); return; }
-  if(TITLE.active){ TITLE.active=false; document.documentElement.classList.remove('title'); camera.fov=cam.fov; camera.updateProjectionMatrix(); }
   if(cam.anim){ const a=cam.anim; a.t=Math.min(1,a.t+dt/a.dur); const k=a.t*a.t*(3-2*a.t); cam.x=a.x0+(a.x1-a.x0)*k; cam.y=a.y0+(a.y1-a.y0)*k; cam.dist=a.d0+(a.d1-a.d0)*k; if(a.yaw1!==undefined){ cam.yaw=a.yaw0+(a.yaw1-a.yaw0)*k; cam.el=a.el0+(a.el1-a.el0)*k; updateCompass(); } if(a.t>=1) cam.anim=null; }
   if(HFMAP && dt>0){ let s2=0; for(const [ox,oy] of [[0,0],[70,0],[-70,0],[0,70],[0,-70]]) s2+=heightAt(clamp(cam.x+ox,0,MW),clamp(cam.y+oy,0,MH)); cam.th+=(clamp(s2/5,0,130)-cam.th)*Math.min(1,dt*2.5); }
   if(TOUCHUI){ cam.yaw=0; cam.el=elForDist(cam.dist); }
@@ -6846,7 +6567,7 @@ function showPause(){
   $('pMem').onclick=()=>{ MEMV.toggle(); $('pMem').textContent='Memory '+(MEMV.on?'on':'off'); };
   $('pGfx').onclick=()=>{ setGfx(!GFX.high); $('pGfx').textContent=`Graphics ${GFX.high?'high':'low'}`; };
   $('pSurrender').onclick=()=>{ S.paused=false; hud.overlay.hidden=true; issueCmd({ k:'surrender', team:ME }); };
-  $('pMenu').onclick=()=>toMenu('home');
+  $('pMenu').onclick=toMenu;
 }
 function togglePause(){
   if(!S || S.demo || S.phase==='over' || S.phase==='menu') return;
@@ -6886,7 +6607,7 @@ function showEnd(){
       ${row('Strikes called',a.stats.supers,b.stats.supers)}</table>
     <div class="btns"><button class="btn primary" id="eAgain">Rematch</button><button class="btn" id="eMenu">Change setup</button></div></div>`;
   if(NET.active){ $('eAgain').textContent='Rematch (both must agree)'; $('eAgain').onclick=()=>{ NET.rematch(); $('eAgain').disabled=true; $('eAgain').textContent='Waiting for '+mpPeerName()+'…'; }; $('eMenu').textContent='Leave'; $('eMenu').onclick=mpLeave; }
-  else { $('eAgain').onclick=()=>startMatch(S.setup); $('eMenu').onclick=()=>toMenu('p-skirmish'); }
+  else { $('eAgain').onclick=()=>startMatch(S.setup); $('eMenu').onclick=toMenu; }
 }
 
 /* =====================================================================
@@ -7275,7 +6996,7 @@ function switchMap(id){
   saveSetup(); location.reload();
 }
 function renderMenu(){
-  { const rb=$('mResume'), sv=SPSAVE.load(); if(rb){ rb.hidden=!sv; { const sk=document.querySelector('.t-item[data-go="skirmish"]'); if(sk) sk.classList.toggle('lead',!sv); } if(sv){ const c=COMMANDERS[sv.cmd], m=Math.floor(sv.t/60), sec=String(sv.t%60).padStart(2,'0'); $('mResumeSub').textContent=`${c?c.name:'Your battle'} · ${m}:${sec} on the clock`; rb.onclick=()=>SPSAVE.resume(); } } }
+  { const rb=$('mResume'), sv=SPSAVE.load(); if(rb){ rb.hidden=!sv; if(sv){ const c=COMMANDERS[sv.cmd], m=Math.floor(sv.t/60), sec=String(sv.t%60).padStart(2,'0'); rb.textContent=`Resume battle (${c?c.short:''} ${m}:${sec})`; rb.onclick=()=>SPSAVE.resume(); } } }
   const other=setup.faction==='covenant'?'forsaken':'covenant';
   $('mEyebrow').textContent='Skirmish · '+MAP.name; menu.querySelector('.lede').textContent=renderer?LEDES[MAP_ID]:menu.querySelector('.lede').textContent;
   const mb=$('mMap'); mb.innerHTML='';
@@ -7311,6 +7032,7 @@ function renderMenu(){
 }
 $('mStart').onclick=()=>{ saveSetup(); SPSAVE.clear(); startMatch({...setup}); };
 $('compass').onclick=()=>resetView();
+$('mLab').onclick=()=>openLab();
 $('mpCreate').onclick=()=>{ saveSetup(); mpCreate(); };
 $('mpJoinBtn').onclick=()=>{ mpJoin($('mpCodeIn').value); };
 $('mpCodeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('mpJoinBtn').click(); });
@@ -7336,11 +7058,10 @@ function startDemo(){
   newMatch({ faction:'covenant', cmd:c[Math.floor(Math.random()*3)], foe:v[Math.floor(Math.random()*3)], diff:'regular', caps:true },{ aiBoth:true });
   S.demo=true; S.phase='play';
 }
-function toMenu(scr){
+function toMenu(){
   if(S && !S.demo && !(GFXR.lost)) SPSAVE.clear();   // leaving a battle on purpose forgets its save
   ME=0; SFX.ambient(false); if(NET.active && NET.state!=='idle'){ NET.leave(); } hud.overlay.hidden=true; hudTop.hidden=true; grim.hidden=true; mini.hidden=true; hud.chip.hidden=true; hud.hint.hidden=true; $('toasts').innerHTML='';
   menu.hidden=false; renderMenu(); startDemo();
-  TSC.entered=true; tsShow(typeof scr==='string'?scr:'home'); TITLE.t=0;
   layoutDone=false; layout();
   FS.sync();
 }
@@ -7525,59 +7246,6 @@ function applyViewHash(){ if(!renderer) return; const toks=(location.hash||'').r
     setTimeout(()=>{ setView(...V[0]); const iv=setInterval(()=>{ i++; if(i>=V.length){ clearInterval(iv); return; } setView(...V[i]); },5000); },400); }
   if(toks.includes('tour')){ const V=[[CX,CY,cam.fit,0,54],[1100,560,900,0,50],[1350,1250,1000,0,52],[2200,1300,750,25,36],[1400,2000,950,0,50],[1500,1300,1700,-20,32],[650,1300,1100,0,54],[CX,CY,cam.fit*0.8,180,40]]; let i=0;
     setTimeout(()=>{ setView(...V[0]); const iv=setInterval(()=>{ i++; if(i>=V.length){ clearInterval(iv); return; } setView(...V[i]); },5000); },400); } }
-/* ---------- v19 title screen ---------- */
-const TSC={ el:$('menu'), screen:'splash', entered:false };
-function tsShow(scr){
-  TSC.screen=scr; TSC.el.dataset.screen=scr;
-  for(const p of TSC.el.querySelectorAll('.t-panel')) p.hidden=('p-'+p.dataset.panel)!==scr;
-  if(scr==='home'){ const rs=$('mResume'), f=(rs && !rs.hidden)?rs:TSC.el.querySelector('.t-item[data-go="'+(TSC.last||'skirmish')+'"]'); if(f && !TOUCHUI) setTimeout(()=>f.focus({preventScroll:true}),60); }
-  else if(scr.startsWith('p-')){ const p=TSC.el.querySelector('.t-panel:not([hidden]) .t-pb'); if(p) p.scrollTop=0; const b=TSC.el.querySelector('.t-panel:not([hidden]) .t-back'); if(b && !TOUCHUI) setTimeout(()=>b.focus({preventScroll:true}),60); }
-}
-function tsEnter(){ if(TSC.entered) return; TSC.entered=true; try{ SFX.unlock&&SFX.unlock(); }catch(_){} tsShow('home'); }
-function tsGo(k){
-  TSC.last=k;
-  if(k==='library'){ openLab(); return; }
-  if(k==='skirmish') renderMenu();
-  if(k==='online') mpRefreshMenu();
-  if(k==='settings') tsSettings();
-  tsShow('p-'+k);
-}
-function tsSettings(){
-  const cur=(()=>{ try{ return localStorage.getItem('cc-snd')||'full'; }catch(_){ return 'full'; } })();
-  segButtons($('tSndSeg'),[['full','Full'],['low','Low'],['off','Off']],cur,v=>{ applySnd(v); tsSndIcon(); },tsSettings);
-  segButtons($('tTodSeg'),[['cycle','Cycle'],['day','Day'],['golden','Golden hour'],['moon','Moonlit']],STYLE.tod,v=>{ STYLE.tod=v; saveStyle(); },tsSettings);
-  segButtons($('tTorchSeg'),[[true,'On'],[false,'Off']],STYLE.torches!==false,v=>{ STYLE.torches=v; saveStyle(); },tsSettings);
-  segButtons($('mGfx'),[[true,'High'],[false,'Low']],GFX.high,v=>{ setGfx(v); },tsSettings);
-  segButtons($('tFpsSeg'),[[30,'30 per second'],[60,'60 per second']],FPS_CAP,v=>{ setFpsCap(v); },tsSettings);
-}
-function tsSndIcon(){ const v=(()=>{ try{ return localStorage.getItem('cc-snd')||'full'; }catch(_){ return 'full'; } })(); const b=$('tSnd'); b.dataset.v=v; b.setAttribute('aria-label','Sound: '+v); }
-function tsWho(){
-  const w=$('tWho'), sub=$('tOnlineSub'); if(!w) return;
-  if(MP.platform && MP.user){ w.innerHTML=`<span class="dot"></span>Signed in as <b>${mpEsc(MP.user.displayName||MP.user.handle||'you')}</b>`; if(sub) sub.textContent='Online, with a room code'; }
-  else if(MP.platform){ w.innerHTML=`<a href="/account" target="_top">Sign in</a> to play a friend online`; if(sub) sub.textContent='Sign in on JAYKOBI GAMES to play online'; }
-  else { w.textContent=''; if(sub) sub.textContent='Online on JAYKOBI GAMES'; }
-}
-{ const _r=mpRefreshMenu; mpRefreshMenu=async function(){ await _r(); tsWho(); }; }
-$('tEnterTxt').textContent=TOUCHUI?'Tap to begin':'Press any key';
-{ const mv=document.querySelector('meta[name="cg-version"]'); if(mv) $('tVer').textContent=mv.content; }
-$('tEnter').onclick=tsEnter;
-TSC.el.addEventListener('pointerdown',e=>{ if(TSC.screen==='splash'){ e.preventDefault(); tsEnter(); } });
-for(const b of TSC.el.querySelectorAll('.t-item[data-go]')) b.onclick=()=>tsGo(b.dataset.go);
-for(const b of TSC.el.querySelectorAll('.t-back')) b.onclick=()=>tsShow('home');
-$('tSnd').onclick=()=>{ cycleSnd(); tsSndIcon(); if(TSC.screen==='p-settings') tsSettings(); };
-// keyboard: any key opens, arrows walk the menu, Escape steps back
-document.addEventListener('keydown',e=>{
-  if(menu.hidden) return;
-  if(TSC.screen==='splash'){ if(!e.metaKey && !e.ctrlKey && !e.altKey){ e.preventDefault(); tsEnter(); } return; }
-  if(e.key==='Escape' && TSC.screen.startsWith('p-')){ e.preventDefault(); tsShow('home'); return; }
-  if(TSC.screen==='home' && (e.key==='ArrowDown'||e.key==='ArrowUp')){
-    const items=[...TSC.el.querySelectorAll('.t-item:not(:disabled):not([hidden])')], i=items.indexOf(document.activeElement);
-    const n=i<0?0:(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length; items[n].focus(); e.preventDefault(); }
-},true);
-tsSndIcon();
-// an invite link goes straight to the online panel; a return from a battle skips the opening card
-{ let code=''; try{ code=new URLSearchParams(location.search).get('join')||sessionStorage.getItem('cc-mp-room')||''; }catch(_){}
-  if(mpCleanCode(code).length===5){ TSC.entered=true; tsGo('online'); } }
 applyHash(); applyViewHash(); window.addEventListener('hashchange',()=>{ applyHash(); applyViewHash(); });
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>layout());
 requestAnimationFrame(t=>{ last=t; scheduleFrame(); });

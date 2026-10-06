@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="cg-version" content="v19">
+<meta name="cg-version" content="v18.1">
 <title>Citadel's Gate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
 <style>
 /* One committed look: a dark war-table HUD over a snowy map. No light/dark split by design. */
 :root{
@@ -261,6 +261,17 @@ html.compact .fs span{inset:8px;}
 .lose h1{color:#f0707a;}
 
 /* ---------- setup menu ---------- */
+.menu{
+  position:fixed; inset:0; z-index:20; overflow-y:auto; touch-action:pan-y; -webkit-overflow-scrolling:touch;
+  background:linear-gradient(rgba(10,12,16,.45), rgba(10,12,16,.82));
+  padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+  display:grid; justify-items:center; align-content:start;
+}
+.menu-card{width:min(780px,100%); box-sizing:border-box; display:grid; gap:18px; background:var(--panel); border:1px solid var(--edge); border-radius:10px; padding:22px;}
+.menu h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(32px, 6vw, 48px); letter-spacing:.03em; line-height:1; text-wrap:balance;}
+.menu h1 .amp{color:var(--gold);}
+.menu .lede{margin:6px 0 0; color:var(--muted); font-size:16px; line-height:1.45; max-width:60ch;}
+.menu h2{margin:0 0 8px; font-family:var(--display); font-weight:500; font-size:13px; letter-spacing:.12em; color:var(--muted);}
 .seg{display:flex; flex-wrap:wrap; gap:6px;}
 .seg button{flex:1 1 auto; min-height:44px; padding:0 14px; font-weight:700; font-size:15px; background:rgba(239,230,210,.06); border:1px solid rgba(239,230,210,.2); border-radius:6px; cursor:pointer;}
 .seg button[aria-pressed="true"]{border-color:var(--gold); background:rgba(226,181,74,.15); color:var(--gold);}
@@ -417,179 +428,6 @@ html.side .mp-chatlog{left:auto; right:max(90px,env(safe-area-inset-right,0px));
 .start-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;}
 .start-row .sum{color:var(--muted); font-size:14px;}
 @media (max-width:520px){ .how dl{grid-template-columns:1fr;} .how dt{margin-top:6px;} }
-/* ---------- v19 title screen: the live battle at dusk behind a crest, a wordmark and a short menu ---------- */
-:root{ --title:"Cinzel","Alegreya SC",Georgia,serif; --ember:#d0532f; --stone:rgba(9,10,15,.84); --hair:linear-gradient(90deg,rgba(226,181,74,0),rgba(226,181,74,.55) 18%,rgba(226,181,74,.55) 82%,rgba(226,181,74,0)); }
-html.title #cv{visibility:hidden;}
-.menu.tscreen{position:fixed; inset:0; z-index:20; overflow:hidden; touch-action:none; background:none; padding:0; display:block;
-  --padx:max(20px, env(safe-area-inset-left,0px) + 16px, 5.5vw);}
-.t-fade{position:absolute; inset:0; background:#05060a; opacity:1; pointer-events:none;}
-.t-vig{position:absolute; inset:0; pointer-events:none;
-  background:
-    radial-gradient(120% 90% at 62% 52%, rgba(0,0,0,0) 45%, rgba(3,4,8,.55) 100%),
-    linear-gradient(90deg, rgba(5,6,11,.9) 0%, rgba(5,6,11,.62) 30%, rgba(5,6,11,0) 56%),
-    linear-gradient(0deg, rgba(5,6,11,.75) 0%, rgba(5,6,11,0) 22%);
-  transition:opacity .6s ease;}
-
-/* ---- the wordmark ---- */
-.t-col{position:absolute; left:var(--padx); top:max(7vh, env(safe-area-inset-top,0px) + 20px); bottom:max(10vh, env(safe-area-inset-bottom,0px) + 58px); width:min(560px, 46vw);
-  display:flex; flex-direction:column; justify-content:space-between; gap:3vh; pointer-events:none; transition:opacity .45s ease, transform .45s ease;}
-.t-col > *{pointer-events:auto;}
-.t-logo{position:relative; display:grid; justify-items:start; gap:0; pointer-events:none; flex:none;}
-.t-logo::before{content:''; position:absolute; inset:-12% -16%; background:radial-gradient(closest-side, rgba(5,6,11,.6), rgba(5,6,11,0)); z-index:-1; pointer-events:none;}
-.tscreen[data-screen="home"] .t-logo{animation:tLogoIn .9s cubic-bezier(.2,.7,.2,1) both;}
-@keyframes tLogoIn{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:none } }
-.t-emb{width:clamp(48px, min(7vw, 10vh), 96px); height:auto; margin:0 0 10px 2px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.6)) drop-shadow(0 0 18px rgba(255,150,70,.18));}
-.t-word{margin:0; display:grid; justify-items:start; line-height:.92; font-family:var(--title); font-weight:700;
-  font-size:clamp(48px, min(8.4vw, 12.5vh), 124px);}
-.t-word span{background:linear-gradient(180deg,#fbf0d2 0%,#efd08a 38%,#d9a446 62%,#9a6522 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
-  filter:drop-shadow(0 2px 0 rgba(0,0,0,.55)) drop-shadow(0 6px 18px rgba(0,0,0,.55));}
-.t-w1{font-size:.34em; letter-spacing:.36em; margin:0 0 .3em .06em; display:block; font-weight:600; white-space:nowrap;}
-.t-w1 i{font-style:normal; letter-spacing:0; font-size:.85em; padding:0 .55em 0 0;} .t-w1 i:last-child{padding:0 0 0 .2em;}
-.t-w2{letter-spacing:.12em; margin-left:-.04em;}
-.t-tag{margin:.9em 0 0 .2em; font-family:var(--display); font-size:clamp(13px, 1.25vw, 16px); letter-spacing:.24em; color:rgba(239,230,210,.72); text-transform:lowercase; font-variant:small-caps;
-  padding-top:.85em; position:relative;}
-.t-tag::before{content:''; position:absolute; left:0; top:0; width:min(260px, 80%); height:1px; background:linear-gradient(90deg,rgba(226,181,74,.7),rgba(226,181,74,0));}
-
-/* ---- opening card ---- */
-.t-enter{white-space:nowrap; position:absolute; left:50%; bottom:max(13vh, env(safe-area-inset-bottom,0px) + 64px); transform:translateX(-50%); background:none; border:0; cursor:pointer; padding:14px 26px;
-  font-family:var(--display); font-size:15px; letter-spacing:.34em; text-transform:uppercase; color:rgba(239,230,210,.86);}
-.t-enter span{animation:tBreathe 2.6s ease-in-out infinite;}
-.t-enter::before,.t-enter::after{content:''; position:absolute; top:50%; width:44px; height:1px; background:linear-gradient(90deg,rgba(226,181,74,0),rgba(226,181,74,.7));}
-.t-enter::before{right:100%;} .t-enter::after{left:100%; transform:scaleX(-1);}
-@keyframes tBreathe{ 0%,100%{opacity:.45} 50%{opacity:1} }
-.tscreen[data-screen="splash"] .t-col{left:0; right:0; top:0; bottom:0; width:auto; align-items:center; justify-content:center;}
-.tscreen[data-screen="splash"] .t-logo{transform:translateY(-5vh); justify-items:center; text-align:center;}
-.tscreen[data-screen="splash"] .t-nav{position:absolute; visibility:hidden;}
-.tscreen[data-screen="splash"] .t-word{justify-items:center; font-size:clamp(60px, 9vw, 128px);}
-.tscreen[data-screen="splash"] .t-tag::before{left:50%; transform:translateX(-50%); background:var(--hair);}
-.tscreen[data-screen="splash"] .t-emb{margin-left:0;}
-.tscreen[data-screen="splash"] .t-vig{background:radial-gradient(90% 80% at 50% 50%, rgba(5,6,11,.35) 0%, rgba(5,6,11,.8) 100%);}
-.tscreen:not([data-screen="splash"]) .t-enter{display:none;}
-.tscreen[data-screen="splash"] .t-foot .t-acct{opacity:0; pointer-events:none;}
-
-/* ---- the menu ---- */
-.t-nav{position:relative; display:grid; gap:2px; width:min(380px, 100%); flex:none;}
-.t-item{position:relative; display:grid; gap:1px; text-align:left; background:none; border:0; padding:min(8px, 1.1vh) 0 min(8px, 1.1vh) 30px; cursor:pointer; color:var(--text);
-  opacity:0; transform:translateX(-14px); transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);}
-.tscreen[data-screen="home"] .t-item{opacity:1; transform:none;}
-.tscreen[data-screen="home"] .t-item:nth-child(1){transition-delay:.15s} .tscreen[data-screen="home"] .t-item:nth-child(2){transition-delay:.21s}
-.tscreen[data-screen="home"] .t-item:nth-child(3){transition-delay:.27s} .tscreen[data-screen="home"] .t-item:nth-child(4){transition-delay:.33s}
-.tscreen[data-screen="home"] .t-item:nth-child(5){transition-delay:.39s} .tscreen[data-screen="home"] .t-item:nth-child(6){transition-delay:.45s}
-.t-k{font-family:var(--display); font-weight:500; font-size:clamp(19px, min(2.1vw, 3.6vh), 27px); letter-spacing:.07em; line-height:1.1; display:flex; align-items:center; gap:10px; color:rgba(239,230,210,.9); transition:color .2s, letter-spacing .3s;}
-.t-item.lead .t-k{font-size:clamp(23px, min(2.6vw, 4.4vh), 33px); font-weight:700; color:#fbf0d2;}
-.t-s{font-size:13.5px; color:rgba(239,230,210,.55); letter-spacing:.02em;}
-.t-item::before{content:''; position:absolute; left:6px; top:calc(min(8px, 1.1vh) + .62em); width:9px; height:9px; border:1.5px solid var(--gold); background:rgba(226,181,74,.25);
-  transform:rotate(45deg) scale(.2); opacity:0; transition:transform .25s, opacity .25s; box-shadow:0 0 10px rgba(255,170,80,.6);}
-.t-item.lead::before{top:calc(min(8px, 1.1vh) + .78em);}
-.t-item::after{content:''; position:absolute; left:30px; right:0; bottom:3px; height:1px; background:linear-gradient(90deg,rgba(226,181,74,.75),rgba(226,181,74,0)); transform:scaleX(0); transform-origin:left; transition:transform .35s ease;}
-.t-item:not(:disabled):is(:hover,:focus-visible) .t-k{color:var(--gold); letter-spacing:.09em;}
-.t-item:not(:disabled):is(:hover,:focus-visible)::before{transform:rotate(45deg) scale(1); opacity:1;}
-.t-item:not(:disabled):is(:hover,:focus-visible)::after{transform:scaleX(1);}
-.t-item:focus{outline:none;}
-.t-item.locked{cursor:default;} .t-item.locked .t-k{color:rgba(239,230,210,.38);} .t-item.locked .t-s{color:rgba(239,230,210,.3);}
-.t-lock{width:11px; height:13px; opacity:.8;}
-
-/* ---- footer ---- */
-.t-foot{position:absolute; left:var(--padx); right:var(--padx); bottom:max(14px, env(safe-area-inset-bottom,0px) + 8px); display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:13px; color:rgba(239,230,210,.55); pointer-events:none;}
-.t-foot > *{pointer-events:auto;}
-.t-acct{transition:opacity .5s;} .t-acct b{color:rgba(239,230,210,.85); font-weight:700;} .t-acct a{color:var(--gold);}
-.t-acct .dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:#6fcf7f; margin-right:7px; box-shadow:0 0 8px rgba(111,207,127,.7); vertical-align:1px;}
-.t-meta{display:flex; align-items:center; gap:12px; margin-left:auto;}
-.t-ver{font-family:var(--display); letter-spacing:.14em;}
-.t-ico{width:40px; height:40px; display:grid; place-items:center; border-radius:50%; border:1px solid rgba(239,230,210,.18); background:rgba(8,9,14,.4); color:rgba(239,230,210,.8); cursor:pointer;}
-.t-ico svg{width:20px; height:20px;}
-.t-ico .x{display:none;} .t-ico[data-v="off"] .x{display:block;} .t-ico[data-v="off"] .w1,.t-ico[data-v="off"] .w2,.t-ico[data-v="low"] .w2{display:none;}
-.t-ico:hover{color:var(--gold); border-color:rgba(226,181,74,.5);}
-
-/* ---- panels ---- */
-.t-panel{position:absolute; left:0; top:0; bottom:0; width:min(600px, 52vw); display:grid; grid-template-rows:auto 1fr auto; background:var(--stone);
-  -webkit-backdrop-filter:blur(8px) saturate(.9); backdrop-filter:blur(8px) saturate(.9);
-  box-shadow:24px 0 60px rgba(0,0,0,.45); animation:tIn .45s cubic-bezier(.2,.7,.2,1);
-  padding-left:env(safe-area-inset-left,0px);}
-.t-panel::after{content:''; position:absolute; top:0; bottom:0; right:0; width:1px; background:linear-gradient(180deg,rgba(226,181,74,0),rgba(226,181,74,.5) 20%,rgba(226,181,74,.5) 80%,rgba(226,181,74,0));}
-@keyframes tIn{ from{ transform:translateX(-30px); opacity:0 } to{ transform:none; opacity:1 } }
-.tscreen[data-screen^="p-"] .t-col{opacity:0; transform:translateX(-30px);} .tscreen[data-screen^="p-"] .t-col *{pointer-events:none;}
-.t-ph{display:flex; align-items:center; gap:14px; padding:max(20px, env(safe-area-inset-top,0px) + 14px) 26px 14px 22px; position:relative;}
-.t-ph::after{content:''; position:absolute; left:22px; right:26px; bottom:0; height:1px; background:var(--hair);}
-.t-ph h2{margin:2px 0 0; font-family:var(--title); font-weight:700; font-size:26px; letter-spacing:.08em; color:#f5e4b8; line-height:1.05;}
-.t-ph .eyebrow{font-size:11.5px; letter-spacing:.22em; color:rgba(239,230,210,.55);}
-.t-back{flex:none; width:44px; height:44px; border-radius:50%; border:1px solid rgba(226,181,74,.45); background:rgba(226,181,74,.06); color:var(--gold); font-size:28px; line-height:1; cursor:pointer; padding:0 0 3px;}
-.t-back:hover,.t-back:focus-visible{background:rgba(226,181,74,.16); outline:none;}
-.t-pb{overflow-y:auto; touch-action:pan-y; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:16px 26px 22px 22px; display:grid; gap:20px; align-content:start;}
-.t-pb h3{margin:0 0 9px; font-family:var(--display); font-weight:500; font-size:13px; letter-spacing:.18em; color:rgba(226,181,74,.85); text-transform:uppercase;}
-.t-pb .lede{margin:2px 0 0; color:rgba(239,230,210,.72); font-size:14.5px; line-height:1.5; max-width:62ch;}
-.t-mapname{margin:0; font-family:var(--title); font-size:20px; letter-spacing:.06em; color:#f5e4b8;}
-.t-pf{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 26px max(16px, env(safe-area-inset-bottom,0px) + 10px) 22px; position:relative; background:linear-gradient(0deg,rgba(5,6,10,.6),rgba(5,6,10,0));}
-.t-pf::before{content:''; position:absolute; left:22px; right:26px; top:0; height:1px; background:var(--hair);}
-.t-pf .sum{color:rgba(239,230,210,.7); font-size:14px; line-height:1.35;}
-.t-go{flex:none; min-height:52px; padding:0 30px; border-radius:4px; cursor:pointer; font-family:var(--title); font-weight:700; font-size:17px; letter-spacing:.14em; text-transform:uppercase;
-  color:#1d1206; border:1px solid #f3d58c; background:linear-gradient(180deg,#f6dc94 0%,#e2b54a 48%,#b9832e 100%);
-  box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 6px 22px rgba(226,140,50,.35), inset 0 1px 0 rgba(255,255,255,.5);}
-.t-go:hover,.t-go:focus-visible{filter:brightness(1.08); outline:none; box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 6px 30px rgba(255,150,60,.55), inset 0 1px 0 rgba(255,255,255,.5);}
-
-/* restyled controls inside panels */
-.t-panel .seg button{min-height:46px; border-radius:3px; background:rgba(239,230,210,.04); border:1px solid rgba(239,230,210,.16); font-family:var(--ui); letter-spacing:.02em; color:rgba(239,230,210,.85);}
-.t-panel .seg button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(226,181,74,.22),rgba(226,181,74,.08)); border-color:rgba(226,181,74,.8); color:#f8e2a6; box-shadow:inset 0 0 0 1px rgba(226,181,74,.2);}
-.t-sides button{min-height:56px!important; font-family:var(--title)!important; font-size:17px!important; letter-spacing:.14em!important; text-transform:uppercase;}
-.t-sides button:first-child{border-left:3px solid #3a78e0!important;} .t-sides button:last-child{border-left:3px solid #c23a44!important;}
-.t-panel .cmds{grid-template-columns:1fr;}
-.t-panel .cmd{border-radius:4px; background:linear-gradient(90deg,rgba(239,230,210,.05),rgba(239,230,210,.02)); border:1px solid rgba(239,230,210,.12); padding:14px;}
-.t-panel .cmd[aria-pressed="true"]{border-color:rgba(226,181,74,.75); background:linear-gradient(90deg,rgba(226,181,74,.16),rgba(226,181,74,.03)); box-shadow:inset 3px 0 0 var(--gold);}
-.t-panel .cmd .cn{font-family:var(--title); letter-spacing:.04em; font-size:18px; color:#f5e4b8;}
-.t-panel .btn{border-radius:3px; letter-spacing:.03em;}
-.t-panel .btn.primary{background:linear-gradient(180deg,#f6dc94,#e2b54a 50%,#b9832e); border-color:#f3d58c; color:#1d1206;}
-.t-card{border:1px solid rgba(239,230,210,.12); background:rgba(239,230,210,.03); border-radius:4px; padding:14px 16px;}
-.t-card .lnote{margin:0 0 12px; font-size:13.5px; line-height:1.45;}
-.t-who{margin:0; font-size:15px; color:rgba(239,230,210,.8);} .t-who b{color:#f5e4b8;} .t-who a{color:var(--gold);}
-.t-panel .how{border:0; padding-top:16px;}
-.t-panel .how dl{grid-template-columns:1fr; gap:4px; margin:0;}
-.t-panel .how dt{font-family:var(--display); letter-spacing:.12em; text-transform:uppercase; font-size:12.5px; margin-top:12px; color:rgba(226,181,74,.9);}
-.t-panel .how dd{color:rgba(239,230,210,.82); font-size:14.5px; line-height:1.5;}
-
-/* ---- portrait: crest on top, menu at the bottom, panels as a sheet ---- */
-@media (orientation:portrait), (max-aspect-ratio:1/1){
-  .t-vig{background:linear-gradient(180deg, rgba(5,6,11,.82) 0%, rgba(5,6,11,.3) 28%, rgba(5,6,11,0) 42%, rgba(5,6,11,.62) 58%, rgba(5,6,11,.95) 82%);}
-  .t-col{left:16px; right:16px; width:auto; top:max(5vh, env(safe-area-inset-top,0px) + 14px); bottom:max(64px, env(safe-area-inset-bottom,0px) + 56px); align-items:center;}
-  .t-logo{justify-items:center; text-align:center;}
-  .t-word{justify-items:center; font-size:clamp(56px, 19vw, 100px);}
-  .t-tag{letter-spacing:.16em; font-size:12.5px; white-space:nowrap;}
-  .tscreen[data-screen^="p-"] .t-foot{opacity:0; pointer-events:none;} .tscreen[data-screen^="p-"] .t-foot *{pointer-events:none;}
-  .t-tag::before{left:50%; transform:translateX(-50%); background:var(--hair);}
-  .t-emb{margin:0 0 8px; width:clamp(52px, 14vw, 72px);}
-  .tscreen[data-screen="splash"] .t-logo{transform:translateY(-6vh);}
-  .tscreen[data-screen="splash"] .t-word{font-size:clamp(52px, 17vw, 96px);}
-  .t-nav{width:min(360px, 100%); justify-items:center;}
-  .t-item{padding:7px 30px; text-align:center; justify-items:center; transform:translateY(10px);}
-  .t-item::before{left:2px;} .t-item.lead::before{left:2px;}
-  .t-item::after{left:30px; right:30px; background:var(--hair); transform-origin:center;}
-  .t-item .t-s{display:none;} .t-item.lead .t-s,.t-item.locked .t-s{display:block;}
-  .t-item.locked .t-s{display:none;}
-  .t-panel{left:0; right:0; top:auto; width:auto; max-height:88vh; max-height:88dvh; border-radius:16px 16px 0 0; animation-name:tUp; box-shadow:0 -20px 60px rgba(0,0,0,.5); padding-left:0;}
-  .t-panel::after{left:0; right:0; top:0; bottom:auto; width:auto; height:1px; background:var(--hair);}
-  .t-ph{padding:16px 18px 12px;} .t-pb{padding:14px 18px 20px;} .t-pf{padding:12px 18px max(14px, env(safe-area-inset-bottom,0px) + 8px);}
-  .t-ph::after,.t-pf::before{left:18px; right:18px;}
-  .t-pf{flex-wrap:wrap;} .t-pf .sum{flex:1 1 100%; font-size:13px;} .t-go{flex:1 1 100%;}
-  @keyframes tUp{ from{ transform:translateY(40px); opacity:0 } to{ transform:none; opacity:1 } }
-}
-/* short landscape phones */
-@media (orientation:landscape) and (max-height:520px){
-  .t-col{top:max(12px, env(safe-area-inset-top,0px) + 8px); bottom:max(42px, env(safe-area-inset-bottom,0px) + 38px); gap:8px;}
-  .t-emb{display:none;}
-  .t-word{font-size:clamp(38px, 11vh, 56px);}
-  .t-tag{margin-top:.6em; padding-top:.6em; font-size:12px;}
-  .t-nav{gap:0;}
-  .t-item{padding:4px 0 4px 26px;} .t-item .t-s{display:none;}
-  .t-k{font-size:19px;} .t-item.lead .t-k{font-size:23px;}
-  .t-item::before{top:calc(4px + .6em);} .t-item.lead::before{top:calc(4px + .7em);}
-  .t-foot{bottom:max(8px, env(safe-area-inset-bottom,0px) + 4px);}
-  .t-ico{width:34px; height:34px;}
-  .tscreen[data-screen="splash"] .t-word{font-size:clamp(46px, 16vh, 76px);}
-  .tscreen[data-screen="splash"] .t-enter{bottom:16px;}
-  .t-panel{width:min(560px, 62vw);}
-  .t-ph{padding-top:max(10px, env(safe-area-inset-top,0px) + 6px); padding-bottom:10px;} .t-ph h2{font-size:21px;}
-}
-@media (orientation:landscape) and (max-height:760px){ .t-item:not(.lead) .t-s{display:none;} }
-@media (prefers-reduced-motion:reduce){ .t-item,.t-logo,.t-panel{transition:none!important; animation:none!important;} .t-enter span{animation:none;} }
 </style>
 </head>
 <body>
@@ -653,109 +491,47 @@ html.title #cv{visibility:hidden;}
   </section>
 </div>
 
-<div class="menu tscreen" id="menu" data-screen="splash">
-  <div class="t-fade" id="tFade" aria-hidden="true"></div>
-  <div class="t-vig" aria-hidden="true"></div>
-
-  <div class="t-col">
-  <!-- the crest and wordmark, shared by the opening card and the home screen -->
-  <header class="t-logo" id="tLogo">
-    <svg class="t-emb" viewBox="0 0 120 92" aria-hidden="true">
-      <defs><linearGradient id="tEmbG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7e4b0"/><stop offset=".6" stop-color="#e2b54a"/><stop offset="1" stop-color="#9c6a24"/></linearGradient></defs>
-      <g fill="none" stroke="url(#tEmbG)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
-        <path d="M60 3v26M52 11h16"/>
-        <path d="M12 86V36h6v-6h5v6h5v-6h5v6h6v50"/>
-        <path d="M81 86V36h6v-6h5v6h5v-6h5v6h6v50"/>
-        <path d="M39 86V48h5v-5h5v5h5v-5h12v5h5v-5h5v5h5v38"/>
-        <path d="M48 86V67a12 12 0 0 1 24 0v19"/>
-        <path d="M54 86V59.6M60 86V55M66 86V59.6M48 72h24M48 79h24" stroke-width="1.7"/>
-        <path d="M4 86h112"/>
-      </g>
-    </svg>
-    <h1 class="t-word"><span class="t-w1"><i aria-hidden="true">†</i>Citadel’s<i aria-hidden="true">†</i></span><span class="t-w2">Gate</span></h1>
-    <p class="t-tag">Hold the gate. Break theirs.</p>
-  </header>
-
-  <!-- home: the main menu -->
-  <nav class="t-nav" id="tNav" aria-label="Main menu">
-    <button class="t-item lead" type="button" id="mResume" hidden><span class="t-k">Resume battle</span><span class="t-s" id="mResumeSub"></span></button>
-    <button class="t-item lead" type="button" data-go="skirmish"><span class="t-k">Skirmish</span><span class="t-s">Battle the AI on Sylvanmere</span></button>
-    <button class="t-item" type="button" data-go="online"><span class="t-k">Play a friend</span><span class="t-s" id="tOnlineSub">Online, with a room code</span></button>
-    <button class="t-item locked" type="button" disabled><span class="t-k">Campaign <svg class="t-lock" viewBox="0 0 12 14" aria-hidden="true"><path d="M3 6V4a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="6" width="9" height="7" rx="1.2" fill="currentColor"/></svg></span><span class="t-s">Coming in a later update</span></button>
-    <button class="t-item" type="button" data-go="library"><span class="t-k">Library</span><span class="t-s">Commanders, units and lore</span></button>
-    <button class="t-item" type="button" data-go="howto"><span class="t-k">How to play</span></button>
-    <button class="t-item" type="button" data-go="settings"><span class="t-k">Settings</span></button>
-  </nav>
-  </div>
-
-  <!-- opening card: the first tap also wakes the sound -->
-  <button class="t-enter" id="tEnter" type="button"><span id="tEnterTxt">Tap to begin</span></button>
-
-  <!-- panels -->
-  <section class="t-panel" id="tpSkirmish" data-panel="skirmish" aria-labelledby="tpSkH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow" id="mEyebrow">Skirmish · Sylvanmere</div><h2 id="tpSkH">Skirmish</h2></div></div>
-    <div class="t-pb">
-      <section class="t-field"><h3>Battlefield</h3><p class="t-mapname">Sylvanmere</p><p class="lede"></p><div class="cmds maps" id="mMap" hidden></div></section>
-      <section><h3>Your side</h3><div class="seg t-sides" id="mFaction"></div></section>
-      <section><h3>Commander</h3><div class="cmds" id="mCmd"></div></section>
-      <section><h3>Opponent</h3><div class="seg" id="mFoe"></div></section>
-      <div class="row2">
-        <section><h3>Difficulty</h3><div class="seg" id="mDiff"></div></section>
-        <section><h3>Unit caps</h3><div class="seg" id="mCaps"></div></section>
-      </div>
+<div class="menu" id="menu">
+  <div class="menu-card">
+    <div>
+      <div class="eyebrow" id="mEyebrow">Skirmish · Frostmere Crossing</div>
+      <h1>Citadel's Gate</h1>
+      <p class="lede">Lead one side of a winter war across a frozen river. Wave infantry march the two outer lanes on their own; the middle lane is yours to fill with gold. You spend gold on everything else, draw their paths, seize the high ground, and break both towers in any lane to expose the enemy stronghold.</p>
     </div>
-    <div class="t-pf"><span class="sum" id="mSum"></span><button class="t-go" id="mStart" type="button">Begin battle</button></div>
-  </section>
-
-  <section class="t-panel" id="tpOnline" data-panel="online" aria-labelledby="tpOnH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Online · 1 v 1</div><h2 id="tpOnH">Play a friend</h2></div></div>
-    <div class="t-pb mp-menu">
-      <p class="t-who mp-who" id="mpWho">Checking your sign-in…</p>
-      <section class="t-card"><h3>Host a battle</h3><p class="lnote">You get a five-letter code and a link to send. You'll both choose commanders in the room; your friend leads the other faction.</p>
-        <div class="mp-row"><button class="btn primary" id="mpCreate" disabled>Create a room</button><button class="btn" id="mpResume" hidden>Resume saved match</button></div></section>
-      <section class="t-card"><h3>Join a battle</h3>
-        <div class="mp-row"><input id="mpCodeIn" class="mp-in code" maxlength="5" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Room code"><button class="btn" id="mpJoinBtn" disabled>Join</button></div>
-        <p class="lnote mp-msg" id="mpMsg" role="status"></p></section>
-      <p class="lnote">Both players need a JAYKOBI GAMES account. If a connection drops, the battle pauses and picks up again when the player returns.</p>
+    <section><h2>Battlefield</h2><div class="cmds maps" id="mMap"></div></section>
+    <section><h2>Your side</h2><div class="seg" id="mFaction"></div></section>
+    <section><h2>Commander</h2><div class="cmds" id="mCmd"></div></section>
+    <section><h2>Opponent</h2><div class="seg" id="mFoe"></div></section>
+    <div class="row2">
+      <section><h2>Difficulty</h2><div class="seg" id="mDiff"></div></section>
+      <section><h2>Unit caps</h2><div class="seg" id="mCaps"></div></section>
+      <section><h2>Graphics</h2><div class="seg" id="mGfx"></div></section>
     </div>
-  </section>
-
-  <section class="t-panel" id="tpSettings" data-panel="settings" aria-labelledby="tpSeH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Options</div><h2 id="tpSeH">Settings</h2></div></div>
-    <div class="t-pb">
-      <section><h3>Graphics</h3><div class="seg" id="mGfx"></div><p class="lnote">Low turns off shadows and some effects. Use it if a phone runs hot.</p></section>
-      <section><h3>Sound</h3><div class="seg" id="tSndSeg"></div></section>
-      <section><h3>Frame rate</h3><div class="seg" id="tFpsSeg"></div><p class="lnote">30 saves battery and keeps phones cooler.</p></section>
-      <section><h3>Time of day in battle</h3><div class="seg" id="tTodSeg"></div><p class="lnote">Cycle runs from daylight to golden hour, night and dawn over a long battle. Looks only.</p></section>
-      <section><h3>Torches and lanterns</h3><div class="seg" id="tTorchSeg"></div></section>
-      <section><h3>Screen</h3><div class="seg"><button class="btn" id="mFs" type="button" hidden>Fullscreen</button></div></section>
-    </div>
-  </section>
-
-  <section class="t-panel" id="tpHowto" data-panel="howto" aria-labelledby="tpHoH" hidden>
-    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Field manual</div><h2 id="tpHoH">How to play</h2></div></div>
-    <div class="t-pb how" id="how">
+    <section class="mp-menu"><h2>Play a friend</h2>
+      <p class="lnote mp-who" id="mpWho">Checking your sign-in…</p>
+      <div class="mp-row"><button class="btn primary" id="mpCreate" disabled>Create a room</button><button class="btn" id="mpResume" hidden>Resume saved match</button></div>
+      <div class="mp-row"><input id="mpCodeIn" class="mp-in code" maxlength="5" placeholder="ROOM CODE" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn" id="mpJoinBtn" disabled>Join</button></div>
+      <p class="lnote mp-msg" id="mpMsg" role="status"></p>
+      <p class="lnote">Pick your commander above first. Your friend joins with the code or the link and plays the other faction. Both of you need a JAYKOBI GAMES account.</p></section>
+    <div class="start-row"><span class="sum" id="mSum"></span><span class="btns" style="margin:0"><button class="btn" id="mFs" hidden>Fullscreen</button><button class="btn" id="mLab">Library</button><button class="btn primary" id="mStart">Start battle</button></span></div>
+    <details class="how" id="how">
+      <summary>How to play</summary>
       <dl>
         <dt>Deploy</dt><dd>Tap a card in the Grimoire, then tap the map (or drag the card there). Every unit marches out of your keep's gate (flyers lift off the keep) at double speed until it clears the blue circle around your stronghold. Drop inside the circle and it goes to that spot; anywhere else: fighters dropped on a lane march that lane, casters, caravans and anti-air walk to the spot and hold it, and flyers fly there and circle.</dd>
         <dt>Command</dt><dd>Press on one of your units and drag to draw its path. Release to send it. Close the loop to make it patrol. End on an enemy to attack it.</dd>
         <dt>Flyers</dt><dd>Flyers never stop. Draw their path across enemy ground to strafe or breathe fire along it; without orders they circle and chase nearby flyers.</dd>
-        <dt>Lanes</dt><dd>Wave infantry march both lanes on their own. Fighting units dropped on a lane march it automatically, and so does any unit you walk back onto a lane. Units left off the lane hold their ground until you give them a path.</dd>
-        <dt>Hidden paths</dt><dd>On Sylvanmere a hidden path leaves each of your lanes, slips through the woods to the Hidden Ford and comes out on the enemy's far lane. Draw a path along one to strike where they aren't looking.</dd>
+        <dt>Lanes</dt><dd>Wave infantry march the two outer lanes on their own; the middle lane only gets what you buy. Fighting units dropped on a lane march it automatically, and so does any unit you walk back onto a lane. Units left off the lane hold their ground until you give them a path.</dd>
         <dt>Gold</dt><dd>Gold fills on its own up to 30 and stops when full, so keep spending. Relic caches appear on the rune circles; move a ground unit onto one for 10–25 gold.</dd>
         <dt>Ranks</dt><dd>You start at Rank I with the scout and the front line. Break the Rank II seal (12 gold) for spawners, flyers and casters, then the Rank III seal (25 gold) and the Rank IV seal (28 gold) for much stronger units. You can field up to 4 of each Rank I–II unit, 2 of each Rank III and 1 of each Rank IV at a time.</dd>
-        <dt>High ground</dt><dd>Units on higher ground shoot 20% farther and hit 25% harder, and units below can't target them unless they come close. Casters and flyers ignore height. Each lane has a nest above it for your mages.</dd>
+        <dt>High ground</dt><dd>Units on higher ground shoot 20% farther and hit 25% harder, and units below can't target them unless they come close. Casters and flyers ignore height. On Frostmere the hills are climbed by their ramps. On Thornspire Pass bare rock can't be climbed at all: roads and stairs are the only ways up, and the stairs lead to the Hawk Ridge and Wolf Ledge lookouts.</dd>
+        <dt>Bridges and tunnels</dt><dd>On Thornspire Pass, Kingsbridge carries the middle road high over the gorge, and a tunnel through Greyspine links the north saddle with Hawk Ridge. Units in a tunnel can't be seen or hit until they come out. The gorge floor is a hidden path between the two low crossings, with a stair up to the middle road. Draw a path across any of them and your unit will use it.</dd>
         <dt>Reading the field</dt><dd>Zoom out and every fighting unit shows a badge with its portrait, a ring in its side's colour and a health ring when hurt. Gold pips mark Rank III and IV units.</dd>
         <dt>Power</dt><dd>Your commander's strike (24 gold, 60 s cooldown) hits anywhere on the map. Tap it, then tap a target.</dd>
         <dt>Camera</dt><dd>On a phone or tablet, hold it sideways like a controller: the view always faces the enemy stronghold, drag to pan and pinch to zoom. Zooming out lifts the camera high over the whole field; zooming in drops it down among the troops. Double-tap to switch between the whole field and a close view, and tap the minimap to jump. With a mouse: drag to pan, scroll to zoom, right-drag to turn and tilt (or Q/E and Z/X), C to reset.</dd>
       </dl>
       <p>Counters matter: flyers shred infantry and caravans, anti-air shreds flyers, casters punish clumps from out of tower range, scouts kill unguarded casters, cannons and beetles kill armor.</p>
-    </div>
-  </section>
-
-  <footer class="t-foot">
-    <span class="t-acct" id="tWho"></span>
-    <span class="t-meta"><button class="t-ico" id="tSnd" type="button" aria-label="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w1" d="M16 9.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="x" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="t-ver" id="tVer">v19</span></span>
-  </footer>
+    </details>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1791,7 +1567,7 @@ function prerenderHF(g,R){
 let _decor=null;
 function decorTrees(){
   if(_decor) return _decor; _decor=[]; if(!HFMAP) return _decor;
-  const rnd=mulberry32(909), mob=MOBILE, cap=ENCH?(GFX.high?(mob?450:1500):(mob?300:450)):GFX.high?(mob?2800:5200):1600, cand=[];   // v12: far fewer rim trees in the enchanted woods
+  const rnd=mulberry32(909), mob=MOBILE, cap=ENCH?(GFX.high?(mob?700:1500):450):GFX.high?(mob?2800:5200):1600, cand=[];   // v12: far fewer rim trees in the enchanted woods
   const nearRoad=(()=>{ const C=40, m=new Set(); for(const r of MAP.roads) for(const [x,y] of r.pts) for(let a=-1;a<=1;a++) for(let b=-1;b<=1;b++) m.add((Math.floor(x/C)+a)*1000+Math.floor(y/C)+b); return (x,y)=>m.has(Math.floor(x/C)*1000+Math.floor(y/C)); })();
   for(let y=16;y<MH-16;y+=19) for(let x=16;x<MW-16;x+=19){
     const px=x+(rnd()-.5)*16, py=y+(rnd()-.5)*16, i=idxAt(px,py); if(i<0 || !BLK[i]) continue;
@@ -2548,12 +2324,12 @@ function airMove(u,dt){
   }
   if(tx===undefined){ const a=Math.atan2(u.y-u.home.y,u.x-u.home.x)+0.95; tx=u.home.x+Math.cos(a)*55; ty=u.home.y+Math.sin(a)*55; }
   tx=clamp(tx,40,MW-40); ty=clamp(ty,40,MH-40);
-  const qm=quickMul(u);                                         // v18.3: the launch boost doubled speed but not turn rate, so new flyers swung wide loops
-  const want=Math.atan2(ty-u.y,tx-u.x), mt=d.turn*qm*dt, off=angDiff(want,u.face);
+  const want=Math.atan2(ty-u.y,tx-u.x), mt=d.turn*dt, off=angDiff(want,u.face);
   u.face+=clamp(off,-mt,mt);
   // near the goal and pointed the wrong way: slow down so the turning circle shrinks inside the capture radius
   const near=!tgt && Math.hypot(tx-u.x,ty-u.y)<R0*2.4, thr=Math.min(thrCap, near?clamp(0.28+0.72*Math.cos(Math.abs(off)),0.28,1):1);
   u.thr=(u.thr??1)+(thr-(u.thr??1))*Math.min(1,dt*6);
+  const qm=quickMul(u);
   u.x=clamp(u.x+Math.cos(u.face)*d.speed*u.thr*qm*dt,5,MW-5);
   u.y=clamp(u.y+Math.sin(u.face)*d.speed*u.thr*qm*dt,5,MH-5);
   return true;
@@ -2966,24 +2742,6 @@ function restoreState(snap,opts={}){
   if(typeof structFor!=='undefined') structFor=null;   // the renderer rebuilds structure meshes against the new entity objects
   return S;
 }
-/* ---- v18.3 single-player battle save: every 30 s, when the page is hidden, and when the 3D view is lost, so a page that
-   iOS reloads can resume. Cleared when the battle ends or the player leaves it. ---- */
-const SPSAVE={ key:'cc-sp-save',
-  ok(){ return !headless && S && !S.demo && !NET.active && !S.net && (S.phase==='play'||S.phase==='countdown'); },
-  save(why){ if(!this.ok()) return; try{ localStorage.setItem(this.key,JSON.stringify({ at:Date.now(), map:MAP_ID, why, t:Math.round(S.t), cmd:S.setup.cmd, foe:S.teams[1].cmdKey, snap:serializeState() })); }catch(err){ console.warn('save failed',err); } },
-  load(){ try{ const v=localStorage.getItem(this.key); if(!v) return null; const o=JSON.parse(v); if(!o||!o.snap||o.map!==MAP_ID||Date.now()-o.at>36*3600e3) return null; return o; }catch(_){ return null; } },
-  has(){ try{ return !!localStorage.getItem(this.key); }catch(_){ return false; } },
-  clear(){ try{ localStorage.removeItem(this.key); }catch(_){} },
-  resume(){
-    const o=this.load(); if(!o){ this.clear(); renderMenu(); return; }
-    try{ ME=0; restoreState(o.snap); }catch(err){ console.error(err); this.clear(); toast('That saved battle could not be loaded','bad'); toMenu(); return; }
-    S.demo=false; S.phase='countdown'; S.countdown=3;
-    menu.hidden=true; hudTop.hidden=false; grim.hidden=false; mini.hidden=false;
-    hud.chip.hidden=true; hud.hint.hidden=true; $('toasts').innerHTML='';
-    setupHUD(); layoutDone=false; layout(); showCountdown(); FS.sync();
-  }
-};
-if(!headless) setInterval(()=>{ if(S && S.phase==='play' && !S.paused) SPSAVE.save('auto'); },30000);
 // ---- checksum: a cheap digest of what matters, for desync detection ----
 function fnv(h,s){ for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h; }
 function stateHash(){
@@ -3128,7 +2886,7 @@ function mpConnect(code,hello){
   NET.onUi=mpEvent; NET.connectWs(MP.wsUrl,hello);
   mpShowLobby('Connecting…');
 }
-function mpLeave(){ NET.leave(); mpHideOverlay(); try{ sessionStorage.removeItem('cc-mp-room'); }catch(_){} if(S && !S.demo){ toMenu('p-online'); } renderMenu(); mpRefreshMenu(); }
+function mpLeave(){ NET.leave(); mpHideOverlay(); try{ sessionStorage.removeItem('cc-mp-room'); }catch(_){} if(S && !S.demo){ toMenu(); } renderMenu(); mpRefreshMenu(); }
 // ---- events from NET ----
 function mpEvent(ev,m){
   switch(ev){
@@ -3573,7 +3331,7 @@ function aiOrders(team,ctx){
    The simulation stays 2D: world x → scene X, world y → scene Z,
    terrain height → scene Y. Everything here is presentation only.
    ===================================================================== */
-let gl=$('gl'); const cv=$('cv'), ctx=cv.getContext('2d');   // v18.2: gl is let so a lost WebGL canvas can be replaced
+const gl=$('gl'), cv=$('cv'), ctx=cv.getContext('2d');
 const hudTop=$('hudTop'), grim=$('grim'), mini=$('mini'), mctx=mini.getContext('2d');
 let W=0, H=0, odpr=1, portrait=false, facing=false, layoutDone=false;
 // v10 touch mode: the phone is held like a controller. The camera always faces the enemy stronghold and pinch-zoom
@@ -3590,7 +3348,6 @@ const camYaw=()=>(facing?-Math.PI/2:0)+(ME?Math.PI:0)+cam.yaw;            // 0 =
 function elForDist(d){ const t=clamp((d-cam.min)/Math.max(1,cam.fit-cam.min),0,1), k=Math.sqrt(t); return cam.ELNEAR+(cam.ELFAR-cam.ELNEAR)*k; }
 const shake={x:0,y:0};
 let zoneFlash=0;
-const SHADOWS=()=>GFX.high && !MOBILE;   // v18.3: shadows cost a second full drawing pass; phones never get them
 const GFX=(()=>{ try{ const v=localStorage.getItem('cc-gfx'); if(v) return {high:v==='high'}; }catch(_){} return {high:true}; })();
 function saveGfx(){ try{ localStorage.setItem('cc-gfx',GFX.high?'high':'low'); }catch(_){} }
 const HAS3D=typeof THREE!=='undefined';
@@ -3730,7 +3487,7 @@ function paintGroundEnchanted(texW){
   return c;
 }
 function paintGround(){
-  if(HFMAP) return (ENCH?paintGroundEnchanted:paintGroundHF)(MOBILE?1536:renderer.capabilities.maxTextureSize>=8192?4096:3072);   // v18.2: phones/tablets 2048 (was 3072, iPad 4096)
+  if(HFMAP) return (ENCH?paintGroundEnchanted:paintGroundHF)(renderer.capabilities.maxTextureSize>=8192 && !/Mobi|Android/i.test(navigator.userAgent)?4096:3072);
   const c=document.createElement('canvas'), s=2048/MW;
   c.width=2048; c.height=Math.round(MH*s);
   const g=c.getContext('2d'); g.setTransform(s,0,0,s,0,0);
@@ -3798,92 +3555,13 @@ function paintGround(){
 }
 
 // ---------- three.js core ----------
-
-/* ---------- v18.2 WebGL context loss: recover instead of a black screen ----------
-   Phones (iOS especially) can take the 3D context away under memory pressure. Then: stop drawing, hold a
-   single-player match, show a small note, and get the view back: wait for the browser to restore it,
-   ask for it (restoreContext), and if neither works rebuild the renderer on a fresh canvas. three.js
-   re-uploads geometry and textures on the next draw. Tests: #ctxloss (lose + restore), #ctxloss2 (lose,
-   refuse restore → rebuild). */
-const GFXR={ lost:false, since:0, tries:0, ext:null, noRestore:false, note:null, timer:0, count:0, rebuilt:false,
-  down(){ return this.lost || !!(renderer && renderer.getContext && renderer.getContext().isContextLost && renderer.getContext().isContextLost()); },
-  watch(c){
-    try{ this.ext=renderer.getContext().getExtension('WEBGL_lose_context'); }catch(_){ this.ext=null; }
-    c.addEventListener('webglcontextlost',e=>{ e.preventDefault(); this.onLost('event'); },false);
-    c.addEventListener('webglcontextrestored',()=>{ if(this.noRestore) return; this.onBack('restored'); },false);
-  },
-  onLost(why){
-    if(this.lost) return; this.lost=true; this.since=performance.now(); this.tries=0; this.count++;
-    console.warn('WebGL context lost ('+why+')');
-    try{ SPSAVE.save('lost'); }catch(_){}              // v18.3: if iOS goes on to reload the page, the battle can be resumed
-    this.show('The phone paused the 3D view. Your battle is saved. Restoring…');
-    clearInterval(this.timer); this.timer=setInterval(()=>this.poll(),500);
-  },
-  poll(){
-    if(!this.lost){ clearInterval(this.timer); return; }
-    const t=performance.now()-this.since;
-    // v18.3: give the browser time to restore on its own (iOS can take many seconds). Rebuilding early put two 3D views in
-    // memory at once and caused more losses. Ask at 20 s, rebuild once per page at 32 s, then offer a reload (the battle is saved).
-    if(this.tries===0 && t>20000){ this.tries=1; if(!this.noRestore && this.ext){ try{ this.ext.restoreContext(); }catch(_){} } }
-    else if(this.tries===1 && t>32000){ this.tries=2; if(!this.rebuilt){ this.rebuilt=true; this.rebuild(); } }
-    else if(this.tries===2 && t>45000){ this.tries=3; this.show('The 3D view could not be restored.',true); }
-  },
-  onBack(why){
-    if(!this.lost) return;
-    this.lost=false; clearInterval(this.timer); console.warn('WebGL context back ('+why+')');
-    try{ if(this.count>=2 && MOBILE && !this.lowDpr){ this.lowDpr=true; }   // v18.3: a second loss drops the phone to a 1× drawing buffer
-      applyWorldLight(); layout(); if(!MOBILE) this.warm(true); }catch(err){ console.error(err); }   // no compile burst on a phone that just recovered
-    if(typeof THUMBS!=='undefined') THUMBS.clear();
-    try{ if(MOBILE && groundTex){ groundTex.image=paintGround(); groundTex.needsUpdate=true; } }catch(err){ console.error(err); }   // v18.4: the page copy was freed
-    try{ if(S && !S.demo && slots.cards && slots.cards.length) refreshCardIcons(); }catch(_){}
-    this.show(this.lowDpr?'3D view restored (sharpness lowered to save memory)':'3D view restored'); setTimeout(()=>{ if(!this.lost) this.hide(); },2200);
-  },
-  rebuild(){
-    try{
-      try{ renderer.dispose(); }catch(_){}
-      const fresh=gl.cloneNode(false); gl.parentNode.replaceChild(fresh,gl); gl=fresh;
-      renderer=makeRenderer(); this.noRestore=false; this.watch(gl);
-      if(renderer.getContext().isContextLost()) throw new Error('new context lost');
-      this.onBack('rebuilt');
-    }catch(err){ console.error(err); }
-  },
-  warm(force){       // compile every material once at match start so nothing new is built mid-match
-    if(!renderer || this.down()) return;
-    if(this._warmed===S && !force) return; this._warmed=S;
-    // v18.3: build both armies' models, instance buffers and badge thumbnails now (during the countdown) instead of the
-    // first time each unit appears mid-match — the first flyer used to trigger all of that at once
-    try{ if(S && !S.demo) for(const T of S.teams){ const f=T.faction.key, ids=T.roster.concat(Object.keys(INF).filter(k=>INF[k].race===T.race));
-      for(const id of ids){ imFor(id,f,INF[id]?420:48); badgeImg(id,f); } } }catch(err){ console.error(err); }
-    try{ renderer.compile(scene,camera); }catch(err){ console.error(err); }
-  },
-  show(msg,fatal){
-    if(!this.note){ const d=document.createElement('div'); d.id='gfxNote';
-      d.style.cssText='position:fixed;left:50%;top:calc(50% - 40px);transform:translateX(-50%);z-index:98;background:rgba(14,18,26,.94);color:#e8e2d0;border:1px solid rgba(226,181,74,.55);border-radius:10px;padding:12px 16px;font:600 14px/1.4 system-ui,sans-serif;text-align:center;max-width:80vw;box-shadow:0 6px 24px rgba(0,0,0,.5)';
-      document.body.appendChild(d); this.note=d; }
-    this.note.innerHTML=''; const p=document.createElement('div'); p.textContent=msg; this.note.appendChild(p);
-    if(fatal){ const b=document.createElement('button'); b.textContent=SPSAVE.has()?'Reload and resume':'Reload the page'; b.style.cssText='margin-top:10px;padding:8px 14px;border-radius:8px;border:0;background:#e2b54a;color:#1a1408;font:700 14px system-ui,sans-serif'; b.onclick=()=>location.reload(); this.note.appendChild(b);
-      const s2=document.createElement('div'); s2.textContent=SPSAVE.has()?'Your battle is saved: tap Resume battle on the menu.':'The match in progress will be lost.'; s2.style.cssText='margin-top:6px;font-weight:400;font-size:12px;opacity:.75'; this.note.appendChild(s2); }
-    this.note.hidden=false;
-  },
-  hide(){ if(this.note) this.note.hidden=true; },
-  test(mode){        // #ctxloss / #ctxloss2: lose the context 8 s into the first match
-    const go=()=>{ if(!S || S.demo || S.phase!=='play' || !this.ext){ setTimeout(go,1000); return; }
-      setTimeout(()=>{ this.noRestore=(mode===2); console.warn('test: forcing context loss'); this.ext.loseContext(); },8000); };
-    go();
-  }
-};
 let renderer, scene, camera, sun, hemi;
 const UP=HAS3D?new THREE.Vector3(0,1,0):null;
-function makeRenderer(){
-  const r=new THREE.WebGLRenderer({ canvas:gl, antialias:!MOBILE, powerPreference:MOBILE?'default':'high-performance' });   // v18.3: no MSAA buffers on phones
-  r.setClearColor(0x0f1216);
-  r.shadowMap.enabled=SHADOWS();
-  r.shadowMap.type=THREE.PCFSoftShadowMap;
-  r.debug.checkShaderErrors=!MOBILE;          // v18.2: a phone that drops the context mid-compile returns null logs; don't throw on them
-  return r;
-}
 function initThree(){
-  renderer=makeRenderer(); GFXR.watch(gl);
+  renderer=new THREE.WebGLRenderer({ canvas:gl, antialias:true, powerPreference:'high-performance' });
+  renderer.setClearColor(0x0f1216);
+  renderer.shadowMap.enabled=GFX.high;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   propMat=new THREE.MeshPhongMaterial({ vertexColors:true, flatShading:true, shininess:50, specular:0x333333 });
   figMat=figureMaterial(); outlineMat=outlineMaterial();
   scene=new THREE.Scene();
@@ -3892,9 +3570,9 @@ function initThree(){
   sun=new THREE.DirectionalLight(0xfff0d8,0.82);
   sun.position.set(CX-1100,1500,CY-900); sun.target.position.set(CX,0,CY);
   scene.add(sun); scene.add(sun.target);
-  sun.castShadow=SHADOWS();
-  const big=renderer.capabilities.maxTextureSize>=8192 && Math.min(screen.width,screen.height)>=700 && !MOBILE;   // v18.2: MOBILE also catches iPads (they report a Mac)
-  const sm=big?4096:MOBILE?1024:2048; sun.shadow.mapSize.set(sm,sm);
+  sun.castShadow=GFX.high;
+  const big=renderer.capabilities.maxTextureSize>=8192 && Math.min(screen.width,screen.height)>=700 && !/Mobi|Android/i.test(navigator.userAgent);
+  sun.shadow.mapSize.set(big?4096:2048,big?4096:2048);
   const sc=sun.shadow.camera, MS=MW/2800; sc.left=-MW*.625; sc.right=MW*.625; sc.top=MH*.78; sc.bottom=-MH*.78; sc.near=200; sc.far=4200*MS+MAX_LEVEL*PLAT_H*4;
   sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.6;
   buildWorld();
@@ -3903,7 +3581,7 @@ function initThree(){
 }
 
 // ---------- style (picked in the Style Lab) ----------
-const STYLE_DEFAULT={ base:'subtle', paint:'toy', outline:!MOBILE, light:'day', tod:'cycle', torches:true };
+const STYLE_DEFAULT={ base:'subtle', paint:'toy', outline:true, light:'day', tod:'cycle', torches:true };
 const STYLE=(()=>{ try{ const s=JSON.parse(localStorage.getItem('cc-style')||'null'); if(s) return {...STYLE_DEFAULT,...s}; }catch(_){} return {...STYLE_DEFAULT}; })();
 function saveStyle(){ try{ localStorage.setItem('cc-style',JSON.stringify(STYLE)); }catch(_){} }
 const styleKey=()=>STYLE.base+'.'+STYLE.paint+(typeof schemeSig==='function'?'.'+schemeSig():'');
@@ -5049,13 +4727,11 @@ function blendLights(w){
   out.pos=[0,1,2].map(j=>P.reduce((a,p,i)=>a+p.pos[j]*w[i],0));
   return out;
 }
-function todMode(){ if(TITLE.on && S && S.demo && !labOpen) return 'title'; return (S && !S.demo && !labOpen && STYLE.tod==='cycle')?'cycle':(STYLE.tod==='cycle'?'day':STYLE.tod); }
+function todMode(){ return (S && !S.demo && !labOpen && STYLE.tod==='cycle')?'cycle':(STYLE.tod==='cycle'?'day':STYLE.tod); }
 function LK(){ const i=TOD_W.indexOf(Math.max(...TOD_W)); return ['day','golden','moon','golden'][i]; }   // nearest preset, for the discrete look switches
 var _todLast=-1;
 function updateDayNight(){
   const mode=todMode();
-  if(mode==='title'){ TOD_W=[0,0,0,0]; NIGHT=TITLE.night; if(_todLast!=='title'){ _todLast='title'; CUR_L=TITLE_L; applyWorldLight(); titleSky(); } return; }
-  if(TITLE.sky && TITLE.sky.visible){ TITLE.sky.visible=false; TITLE.ring.visible=false; }
   TOD_W=mode==='cycle'?todWeights((S.t||0)/60+TOD_OFF):mode==='golden'?[0,1,0,0]:mode==='moon'?[0,0,1,0]:[1,0,0,0];
   NIGHT=TOD_W.reduce((a,v,i)=>a+v*TOD_DARK[i],0);
   const sig=TOD_W.map(v=>v.toFixed(3)).join();
@@ -5063,15 +4739,15 @@ function updateDayNight(){
   CUR_L=blendLights(TOD_W); applyWorldLight();
 }
 // ---- torchlight ----
-var GLOW=null, POOLS=null; const POOL_CAP=MOBILE?140:260;   // v18.3: fewer ground light pools on phones
+var GLOW=null, POOLS=null;
 function initGlow(){
   GLOW=makePoints(900,true); GLOW.p.renderOrder=5;
   const cv=document.createElement('canvas'); cv.width=cv.height=64; const c=cv.getContext('2d'), g=c.createRadialGradient(32,32,0,32,32,32);
   g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.35,'rgba(255,255,255,.45)'); g.addColorStop(1,'rgba(255,255,255,0)'); c.fillStyle=g; c.fillRect(0,0,64,64);
   const tex=new THREE.CanvasTexture(cv), geo=new THREE.PlaneGeometry(1,1); geo.rotateX(-Math.PI/2);
   const mat=new THREE.MeshBasicMaterial({ map:tex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, color:0xffffff, opacity:0, fog:false, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
-  POOLS=new THREE.InstancedMesh(geo,mat,POOL_CAP); POOLS.count=0; POOLS.frustumCulled=false; POOLS.renderOrder=3;
-  POOLS.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(POOL_CAP*3),3); POOLS.instanceColor.setUsage(THREE.DynamicDrawUsage); POOLS.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  POOLS=new THREE.InstancedMesh(geo,mat,260); POOLS.count=0; POOLS.frustumCulled=false; POOLS.renderOrder=3;
+  POOLS.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(260*3),3); POOLS.instanceColor.setUsage(THREE.DynamicDrawUsage); POOLS.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   scene.add(POOLS);
 }
 const TORCH=[1.0,.62,.25], LANTERN=[1.0,.78,.42], STAFF_C=[.78,.72,1.0], STAFF_F=[.62,1.0,.75], GRAVE=[.6,1.0,.72];
@@ -5082,7 +4758,7 @@ function glowPush(x,h,y,col,size,alpha){
   pa.psize.array[i]=size; pa.palpha.array[i]=alpha;
 }
 function poolPush(x,y,r,col,k){
-  if(POOLS.count>=POOL_CAP) return; const i=POOLS.count++;
+  if(POOLS.count>=260) return; const i=POOLS.count++;
   dummy.position.set(x,heightAt(clamp(x,0,MW),clamp(y,0,MH))+1.2,y); dummy.rotation.set(0,0,0); dummy.scale.set(r*2,1,r*2); dummy.updateMatrix(); POOLS.setMatrixAt(i,dummy.matrix);
   POOLS.instanceColor.array[i*3]=col[0]*k; POOLS.instanceColor.array[i*3+1]=col[1]*k; POOLS.instanceColor.array[i*3+2]=col[2]*k;
 }
@@ -5133,7 +4809,7 @@ function applyStyle(){
 }
 function refreshModels(){
   clearModelCache();
-  for(const o of IM.values()){ scene.remove(o.mesh); if(o.outline) scene.remove(o.outline); try{ o.mesh.dispose&&o.mesh.dispose(); o.outline&&o.outline.dispose&&o.outline.dispose(); }catch(_){} }   // v18.2: free GPU instance buffers
+  for(const o of IM.values()){ scene.remove(o.mesh); if(o.outline) scene.remove(o.outline); }
   IM.clear();
   figMat.dispose(); figMat=figureMaterial();
   THUMBS.clear(); if(typeof BADGE_IMG!=='undefined') BADGE_IMG.clear();
@@ -5142,10 +4818,10 @@ function refreshModels(){
 }
 
 // ---------- thumbnails of the real models (cards, menu tiles) ----------
-let thumbScene=null, thumbCam=null, thumbRT=null; const THUMB_RTS=new Map();
+let thumbScene=null, thumbCam=null, thumbRT=null;
 const THUMBS=new Map();
 function thumbURL(id,f,w=160,h=100){
-  if(!renderer || GFXR.down()) return null;
+  if(!renderer) return null;
   const key=id+'|'+f+'|'+styleKey()+'|'+w;
   if(THUMBS.has(key)) return THUMBS.get(key);
   if(!thumbScene){
@@ -5154,7 +4830,7 @@ function thumbURL(id,f,w=160,h=100){
     const d=new THREE.DirectionalLight(0xfff0d8,.85); d.position.set(3,5,4); thumbScene.add(d);
     thumbCam=new THREE.PerspectiveCamera(28,w/h,.1,200);
   }
-  const rk=w+'x'+h; thumbRT=THUMB_RTS.get(rk); if(!thumbRT){ thumbRT=new THREE.WebGLRenderTarget(w,h); THUMB_RTS.set(rk,thumbRT); }   // v18.3: one target per size (they used to be replaced without being freed)
+  if(!thumbRT || thumbRT.width!==w) thumbRT=new THREE.WebGLRenderTarget(w,h);
   thumbCam.aspect=w/h; thumbCam.updateProjectionMatrix();
   const geo=modelGeo(id,f), mesh=new THREE.Mesh(geo,figMat), grp=new THREE.Group(); grp.add(mesh);
   if(STYLE.outline){ const ol=new THREE.Mesh(geo,outlineMat); grp.add(ol); }
@@ -5192,7 +4868,7 @@ function buildDressing(){
   // camps and banners per side (faction colours are fixed by map side for the match; rebuilt when factions change)
   dressingGroup=new THREE.Group(); scene.add(dressingGroup);
   rebuildFactionDressing=function(fk0,fk1){
-    while(dressingGroup.children.length){ const c=dressingGroup.children[0]; dressingGroup.remove(c); try{ c.dispose&&c.dispose(); }catch(_){} }   // v18.3: free the old instance buffers
+    while(dressingGroup.children.length) dressingGroup.remove(dressingGroup.children[0]);
     const lists=[[tents0,banners0,fire0,fk0],[tents0.map(Rp),banners0.map(Rp),Rp(fire0),fk1]];
     for(const [tents,banners,fire,fk] of lists){
       const tm=new THREE.InstancedMesh(tentGeo[fk],propMat,tents.length);
@@ -5640,8 +5316,7 @@ function buildWorld(){
     col[k*3]=r; col[k*3+1]=g; col[k*3+2]=bl;
   }
   tg.setAttribute('color',new THREE.BufferAttribute(col,3));
-  groundTex=new THREE.CanvasTexture(paintGround()); groundTex.anisotropy=Math.min(MOBILE?4:8,renderer.capabilities.getMaxAnisotropy());
-  if(MOBILE) groundTex.onUpdate=t=>{ const im=t.image; if(im && im.width>1){ im.width=1; im.height=1; } };   // v18.4: once on the GPU, free the page's copy (repainted if the 3D view is restored)
+  groundTex=new THREE.CanvasTexture(paintGround()); groundTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   const terrain=new THREE.Mesh(tg,new THREE.MeshLambertMaterial({ map:groundTex, vertexColors:true }));
   terrain.receiveShadow=true; scene.add(terrain);
   // skirt + wooden frame + table
@@ -5688,15 +5363,17 @@ function buildWorld(){
   }
   // trees
   const trees=[];
-  for(const f of MAP.forests){ const cnt=Math.round(f.r*f.r/(ENCH?(MOBILE?900:430):95)), mine=[];
+  for(const f of MAP.forests){ const cnt=Math.round(f.r*f.r/(ENCH?(MOBILE?620:430):95)), mine=[];
     for(let i=0,tries=0;i<cnt && tries<cnt*6;tries++){ const a=rnd()*TAU, r=Math.sqrt(rnd())*f.r, x=f.x+Math.cos(a)*r, y=f.y+Math.sin(a)*r;
       if(ENCH && mine.some(t=>Math.hypot(t.x-x,t.y-y)<22)) continue;                     // v12: spread the elven trees out
       if(MAP.keeps.some(k=>Math.hypot(k.x-x,k.y-y)<CONFIG.keep.wallR+30)) continue;
       const t={x,y,s:(ENCH?1.05:.75)+rnd()*(ENCH?.6:.55),rot:rnd()*TAU}; mine.push(t); trees.push(t); i++; } }
-  // v18.4: trees go in map tiles so the off-screen ones are skipped (one big batch was always drawn whole)
-  trees.forEach(t=>{ t.sy=t.s*(0.9+rnd()*.3); });
-  tiledTrees(ENCH?buildElfTree():HFMAP?buildPineLow():buildPine(),trees,-1,SHADOWS()||!MOBILE);
-  if(HFMAP){ const dt=decorTrees(); dt.forEach(t=>{ t.sy=t.s*(0.85+rnd()*.4); }); tiledTrees(ENCH?buildElfTreeLow():buildPineLow(),dt,-1.5,SHADOWS()); }
+  const pine=new THREE.InstancedMesh(ENCH?buildElfTree():HFMAP?buildPineLow():buildPine(),LAMBMAT(),trees.length||1); pine.count=trees.length;
+  trees.forEach((t,i)=>{ dm.position.set(t.x,terrainH(t.x,t.y)-1,t.y); dm.rotation.set(0,t.rot,0); dm.scale.set(t.s,t.s*(0.9+rnd()*.3),t.s); dm.updateMatrix(); pine.setMatrixAt(i,dm.matrix); });
+  pine.castShadow=true; pine.receiveShadow=true; scene.add(pine);
+  if(HFMAP){ const dt=decorTrees(), dp=new THREE.InstancedMesh(ENCH?buildElfTreeLow():buildPineLow(),LAMBMAT(),dt.length||1); dp.count=dt.length;
+    dt.forEach((t,i)=>{ dm.position.set(t.x,terrainH(t.x,t.y)-1.5,t.y); dm.rotation.set(0,t.rot,0); dm.scale.set(t.s,t.s*(0.85+rnd()*.4),t.s); dm.updateMatrix(); dp.setMatrixAt(i,dm.matrix); });
+    dp.castShadow=GFX.high && !(ENCH&&MOBILE); dp.receiveShadow=true; scene.add(dp); }
   // rocks
   const rocks=[];
   // scree at the foot of every cliff and a few boulders on the rims, so each tier reads as a real step
@@ -5762,26 +5439,6 @@ function buildDynamic(){
   pSys=[makePoints(1600,false),makePoints(1600,true)];
   snow=makeSnow(GFX.high?520:220);
 }
-const CULL=[], _cullM=HAS3D?new THREE.Matrix4():null, _cullF=HAS3D?new THREE.Frustum():null, _cullS=HAS3D?new THREE.Sphere():null;
-function tiledTrees(geo,list,dy,cast){
-  const T=MOBILE?360:480, groups=new Map(), mat=LAMBMAT(), dm=new THREE.Object3D();
-  for(const t of list){ const k=Math.floor(t.x/T)+','+Math.floor(t.y/T); let g=groups.get(k); if(!g){ g=[]; groups.set(k,g); } g.push(t); }
-  geo.computeBoundingSphere(); const tr=geo.boundingSphere.radius;
-  for(const arr of groups.values()){
-    const m=new THREE.InstancedMesh(geo,mat,arr.length); let sx=0, sy=0, sh=0;
-    arr.forEach((t,i)=>{ const h=t._h=terrainH(t.x,t.y); dm.position.set(t.x,h+dy,t.y); dm.rotation.set(0,t.rot,0); dm.scale.set(t.s,t.sy,t.s); dm.updateMatrix(); m.setMatrixAt(i,dm.matrix); sx+=t.x; sy+=t.y; sh+=h; });
-    const cx=sx/arr.length, cy=sy/arr.length, ch=sh/arr.length; let r=0;
-    for(const t of arr) r=Math.max(r,Math.hypot(t.x-cx,t.y-cy,t._h-ch)+2*tr*Math.max(t.s,t.sy));   // the tree's own size counted generously (its pivot is at the base)
-    m.castShadow=cast; m.receiveShadow=true; m.frustumCulled=false; scene.add(m);
-    CULL.push({ m, x:cx, y:cy, h:ch, r });
-  }
-}
-function cullTiles(){
-  if(!CULL.length) return;
-  camera.updateMatrixWorld(); _cullM.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse); _cullF.setFromProjectionMatrix(_cullM);
-  const pad=SHADOWS()?260:15;       // with shadows on, trees just off screen still cast onto it
-  for(const c of CULL){ _cullS.center.set(c.x,c.h,c.y); _cullS.radius=c.r+pad; c.m.visible=_cullF.intersectsSphere(_cullS); }
-}
 function makePoints(cap,additive){
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(cap*3),3).setUsage(THREE.DynamicDrawUsage));
@@ -5841,60 +5498,7 @@ function animOf(e,x,y,s,air,dt){
 }
 
 // ---------- camera ----------
-/* ---------- title screen camera: a slow cinematic drift over the live demo battle ---------- */
-const TITLE={ on:true, t:0, night:.62, over:null, fov:38, sky:null };
-// the title screen's own dusk: a low ember sun behind the enemy's woods, cool blue shadows, torches lit
-const TITLE_L={ sky:0x5a6aa8, ground:0x1c1820, hi:.62, sun:0xff9750, si:1.25, pos:[1900,380,-500], clear:0x0b0d16, water:0x34506c, fire:1.5, snow:.55,
-  fog:0x3a3247, fogNear:700, fogFar:3300, fill:0x4a58a0, fi:.32, grade:'' };
-function titleSky(){
-  if(!renderer) return;
-  if(!TITLE.sky){
-    const geo=new THREE.SphereGeometry(9000,32,16);
-    const mat=new THREE.ShaderMaterial({ side:THREE.BackSide, depthWrite:false, fog:false,
-      uniforms:{ sunDir:{value:new THREE.Vector3(1,.08,-.25).normalize()}, hor:{value:new THREE.Color(0x3a3247)}, zen:{value:new THREE.Color(0x0a0e1e)}, ember:{value:new THREE.Color(0xff8a3c)}, gold:{value:new THREE.Color(0xffd08a)} },
-      vertexShader:'varying vec3 vD; void main(){ vD=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-      fragmentShader:'uniform vec3 sunDir,hor,zen,ember,gold; varying vec3 vD; void main(){ float h=vD.y; vec3 c=mix(hor,zen,smoothstep(-.02,.55,h)); float s=max(dot(normalize(vD),sunDir),0.0); float band=exp(-abs(h-.02)*9.0); c+=ember*pow(s,6.0)*band*.85+gold*pow(s,60.0)*.6+ember*.12*band; gl_FragColor=vec4(c,1.0); }' });
-    TITLE.sky=new THREE.Mesh(geo,mat); TITLE.sky.renderOrder=-10; TITLE.sky.frustumCulled=false; scene.add(TITLE.sky);
-    // a ring of dark hills and treeline beyond the board's edge, so the low shots meet a horizon instead of the table
-    const R=mulberryTitle(7), cone=new THREE.ConeGeometry(1,1,7); cone.translate(0,.5,0);
-    const m2=new THREE.MeshLambertMaterial({ color:0x1b1d26, flatShading:true });
-    const N=90, ring=new THREE.InstancedMesh(cone,m2,N), dm=new THREE.Object3D();
-    for(let i=0;i<N;i++){ const far=true, a=(i/N)*TAU+R()*.05, dd=1900+R()*1300, rx=MW/2+dd, ry=MH/2+dd;
-      const h=far?300+R()*520:110+R()*160, w=far?Math.min(dd*.85,h*(.9+R()*.4)):h*.35;
-      dm.position.set(CX+Math.cos(a)*rx,-10,CY+Math.sin(a)*ry); dm.scale.set(w,h,w); dm.rotation.set(0,R()*6,0); dm.updateMatrix(); ring.setMatrixAt(i,dm.matrix); }
-    TITLE.ring=ring; scene.add(ring);
-  }
-  TITLE.sky.visible=true; TITLE.ring.visible=true;
-}
-function mulberryTitle(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-window.__TITLE=TITLE;
-// three slow shots, each a gentle dolly; a dip to dark between them. Landscape keeps the subject right of the menu.
-const TITLE_SHOTS=[
-  { p0:[-70,1200,205], p1:[-70,1020,220], t0:[760,1110,95], t1:[760,1090,100], fov:38 },          // our keep against the sunset, the enemy spire on the horizon
-  { p0:[780,1270,128], p1:[700,1215,112], t0:[330,1095,78], t1:[330,1090,74], fov:40 },         // the gate itself, lit by the low sun, troops marching out
-  { p0:[560,1330,330], p1:[760,1280,300], t0:[2470,1100,70], t1:[2470,1100,60], fov:34 },       // over the woods toward their citadel
-];
-const TITLE_DUR=17, TITLE_FADE=1.3;
-function titleCam(dt){
-  TITLE.t+=dt||0;
-  let v=TITLE.over;
-  if(v && typeof v==='function') v=v(TITLE.t);
-  if(!v){
-    const n=TITLE_SHOTS.length, k=Math.floor(TITLE.t/TITLE_DUR), u=(TITLE.t%TITLE_DUR)/TITLE_DUR, sh=TITLE_SHOTS[k%n], e=u*u*(3-2*u)*.6+u*.4;
-    const L=(a,b)=>a.map((x,i)=>x+(b[i]-x)*e), p=L(sh.p0,sh.p1), t=L(sh.t0,sh.t1);
-    const land=view.w>view.h*1.15;
-    if(land){ const fx=t[0]-p[0], fy=t[1]-p[1], fl=Math.hypot(fx,fy)||1, d=Math.hypot(fx,fy), k2=d*.26; t[0]-=(-fy/fl)*k2; t[1]-=(fx/fl)*k2; }  // swing the view so the subject sits right of the menu
-    v={ p, t, fov:sh.fov+(land?0:8) };
-    const fe=$('tFade'); if(fe){ const tt=TITLE.t%TITLE_DUR, a=tt<TITLE_FADE?1-tt/TITLE_FADE:tt>TITLE_DUR-TITLE_FADE?(tt-(TITLE_DUR-TITLE_FADE))/TITLE_FADE:0; fe.style.opacity=(TITLE.t<TITLE_FADE?1-TITLE.t/TITLE_FADE:a).toFixed(3); }
-  }
-  camera.fov=v.fov||TITLE.fov; camera.updateProjectionMatrix();
-  camera.position.set(v.p[0],v.p[2],v.p[1]); camera.lookAt(v.t[0],v.t[2],v.t[1]);
-  if(TITLE.sky) TITLE.sky.position.copy(camera.position);
-  cam.x=v.t[0]; cam.y=v.t[1]; camera.updateMatrixWorld();
-}
 function updateCamera(dt){
-  if(TITLE.on && S && S.demo && camera && !labOpen){ if(!TITLE.active){ TITLE.active=true; document.documentElement.classList.add('title'); } titleCam(dt); return; }
-  if(TITLE.active){ TITLE.active=false; document.documentElement.classList.remove('title'); camera.fov=cam.fov; camera.updateProjectionMatrix(); }
   if(cam.anim){ const a=cam.anim; a.t=Math.min(1,a.t+dt/a.dur); const k=a.t*a.t*(3-2*a.t); cam.x=a.x0+(a.x1-a.x0)*k; cam.y=a.y0+(a.y1-a.y0)*k; cam.dist=a.d0+(a.d1-a.d0)*k; if(a.yaw1!==undefined){ cam.yaw=a.yaw0+(a.yaw1-a.yaw0)*k; cam.el=a.el0+(a.el1-a.el0)*k; updateCompass(); } if(a.t>=1) cam.anim=null; }
   if(HFMAP && dt>0){ let s2=0; for(const [ox,oy] of [[0,0],[70,0],[-70,0],[0,70],[0,-70]]) s2+=heightAt(clamp(cam.x+ox,0,MW),clamp(cam.y+oy,0,MH)); cam.th+=(clamp(s2/5,0,130)-cam.th)*Math.min(1,dt*2.5); }
   if(TOUCHUI){ cam.yaw=0; cam.el=elForDist(cam.dist); }
@@ -5986,7 +5590,7 @@ function layout(){
   if(renderer){
     gl.style.top=view.y+'px'; gl.style.width=view.w+'px'; gl.style.height=view.h+'px';
     const vg=$('vig'); vg.style.top=view.y+'px'; vg.style.height=view.h+'px'; vg.style.width=view.w+'px';
-    renderer.setPixelRatio(Math.min(devicePixelRatio||1,GFXR.lowDpr?1:GFX.high?(MOBILE?1.5:2):1.25));   // v18.2: phones 1.5 (was 2); v18.3: 1 after a second loss
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,GFX.high?2:1.25));
     renderer.setSize(view.w,view.h,false);
     camera.aspect=view.w/view.h; camera.updateProjectionMatrix();
     for(const s of pSys) s.m.uniforms.uScale.value=view.h/(2*Math.tan(cam.fov*Math.PI/360));
@@ -6014,7 +5618,7 @@ function layout(){
 function setGfx(high){
   GFX.high=high; saveGfx();
   if(!renderer) return;
-  renderer.shadowMap.enabled=SHADOWS(); sun.castShadow=SHADOWS(); applyWorldLight();
+  renderer.shadowMap.enabled=high; sun.castShadow=high; applyWorldLight();
   scene.traverse(o=>{ if(o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true); } });
   scene.remove(snow.p); snow=makeSnow(high?520:220);
   layout();
@@ -6553,12 +6157,11 @@ function render(alpha,dt){
   else { shake.x=shake.y=0; S.shake=0; }
   if(zoneFlash>0) zoneFlash=Math.max(0,zoneFlash-dt*0.8);
   if(!renderer) return;
-  if(GFXR.down()) return;                       // v18.2: 3D context lost — draw nothing until it is back
   if(labOpen){ renderLab(dt); return; }
   if(S.phase==='over' && !S.demo && !S._camDone){ S._camDone=true; const k=S.keeps[1-S.winner]; cam.anim={ t:0, dur:1.6, x0:cam.x, y0:cam.y, d0:cam.dist, x1:k.x, y1:k.y, d1:Math.max(cam.min,cam.home*0.55) }; }
   updateCamera(dt);
   ppuC=ppuAt(cam.x,cam.th,cam.y);
-  if(dressedFor!==S){ dressedFor=S; rebuildFactionDressing(S.teams[0].faction.key,S.teams[1].faction.key); GFXR.warm(); }
+  if(dressedFor!==S){ dressedFor=S; rebuildFactionDressing(S.teams[0].faction.key,S.teams[1].faction.key); }
   if(waterTex) waterTex.offset.y-=dt*0.05;
   updateDayNight();
   if(lampLight) lampLight.intensity=GFX.high?.5+1.1*NIGHT:0;
@@ -6566,7 +6169,7 @@ function render(alpha,dt){
   if(!headless && S.phase!=='menu') runEmitters(dt*(S.paused?0:1));
   U_TIME.value=now/1000;
   syncStructures(); syncUnits(alpha,now,dt); syncGlow(alpha,now); syncProjectiles(alpha); syncCaches(now); syncStrikes(now); syncFx(); syncSnow(dt);
-  cullTiles(); renderer.render(scene,camera);
+  renderer.render(scene,camera);
   drawOverlay(alpha);
 }
 
@@ -6835,18 +6438,16 @@ function showPause(){
   hud.overlay.innerHTML=`<div class="card"><div class="eyebrow">${MAP.name} · ${fmtTime(S.t)}</div><div class="vs">${portraitImg(cmdKeyOf(a),a.faction.key)}<span>VS</span>${portraitImg(cmdKeyOf(b),b.faction.key)}</div><h1>Paused</h1>
     <p>${a.cmd.name} against ${b.cmd.name} (${CONFIG.difficulty[S.setup.diff].label}).</p>
     <div class="btns"><button class="btn primary" id="pResume">Resume</button><button class="btn" id="pRestart">Restart</button></div>
-    <div class="btns"><button class="btn" id="pSpeed">Speed ${S.speed}×</button><button class="btn" id="pGfx">Graphics ${GFX.high?'high':'low'}</button><button class="btn" id="pDebug">Debug ${S.debug?'on':'off'}</button><button class="btn" id="pFps">Frames ${FPS_CAP}/s</button><button class="btn" id="pMem">Memory ${MEMV.on?'on':'off'}</button><button class="btn" id="pSnd">Sound ${({full:'full',low:'low',off:'off'})[(()=>{ try{ return localStorage.getItem('cc-snd')||'full'; }catch(_){ return 'full'; } })()]}</button></div>
+    <div class="btns"><button class="btn" id="pSpeed">Speed ${S.speed}×</button><button class="btn" id="pGfx">Graphics ${GFX.high?'high':'low'}</button><button class="btn" id="pDebug">Debug ${S.debug?'on':'off'}</button><button class="btn" id="pSnd">Sound ${({full:'full',low:'low',off:'off'})[(()=>{ try{ return localStorage.getItem('cc-snd')||'full'; }catch(_){ return 'full'; } })()]}</button></div>
     <div class="btns"><button class="btn danger" id="pSurrender">Surrender</button><button class="btn" id="pMenu">Main menu</button></div></div>`;
   $('pResume').onclick=togglePause;
   $('pSnd').onclick=()=>{ cycleSnd(); $('pSnd').textContent='Sound '+(()=>{ try{ return localStorage.getItem('cc-snd')||'full'; }catch(_){ return 'full'; } })(); };
   $('pRestart').onclick=()=>startMatch(S.setup);
   $('pSpeed').onclick=()=>{ S.speed=S.speed===1?2:S.speed===2?4:1; $('pSpeed').textContent=`Speed ${S.speed}×`; };
   $('pDebug').onclick=()=>{ S.debug=!S.debug; $('pDebug').textContent=`Debug ${S.debug?'on':'off'}`; };
-  $('pFps').onclick=()=>{ setFpsCap(FPS_CAP===30?60:30); $('pFps').textContent='Frames '+FPS_CAP+'/s'; };
-  $('pMem').onclick=()=>{ MEMV.toggle(); $('pMem').textContent='Memory '+(MEMV.on?'on':'off'); };
   $('pGfx').onclick=()=>{ setGfx(!GFX.high); $('pGfx').textContent=`Graphics ${GFX.high?'high':'low'}`; };
   $('pSurrender').onclick=()=>{ S.paused=false; hud.overlay.hidden=true; issueCmd({ k:'surrender', team:ME }); };
-  $('pMenu').onclick=()=>toMenu('home');
+  $('pMenu').onclick=toMenu;
 }
 function togglePause(){
   if(!S || S.demo || S.phase==='over' || S.phase==='menu') return;
@@ -6867,7 +6468,6 @@ function mpShowMenu(){
   $('mpSurrender').onclick=()=>{ issueCmd({ k:'surrender', team:ME }); mpHideOverlay(); delete hud.overlay.dataset.mpmenu; };
 }
 function showEnd(){
-  SPSAVE.clear();
   const win=S.winner===ME, [a,b]=TEAMS();
   hud.overlay.className='overlay '+(win?'win':'lose'); hud.overlay.hidden=false;
   const row=(label,x,y)=>`<tr><td>${label}</td><td>${x}</td><td>${y}</td></tr>`;
@@ -6886,7 +6486,7 @@ function showEnd(){
       ${row('Strikes called',a.stats.supers,b.stats.supers)}</table>
     <div class="btns"><button class="btn primary" id="eAgain">Rematch</button><button class="btn" id="eMenu">Change setup</button></div></div>`;
   if(NET.active){ $('eAgain').textContent='Rematch (both must agree)'; $('eAgain').onclick=()=>{ NET.rematch(); $('eAgain').disabled=true; $('eAgain').textContent='Waiting for '+mpPeerName()+'…'; }; $('eMenu').textContent='Leave'; $('eMenu').onclick=mpLeave; }
-  else { $('eAgain').onclick=()=>startMatch(S.setup); $('eMenu').onclick=()=>toMenu('p-skirmish'); }
+  else { $('eAgain').onclick=()=>startMatch(S.setup); $('eMenu').onclick=toMenu; }
 }
 
 /* =====================================================================
@@ -7275,7 +6875,6 @@ function switchMap(id){
   saveSetup(); location.reload();
 }
 function renderMenu(){
-  { const rb=$('mResume'), sv=SPSAVE.load(); if(rb){ rb.hidden=!sv; { const sk=document.querySelector('.t-item[data-go="skirmish"]'); if(sk) sk.classList.toggle('lead',!sv); } if(sv){ const c=COMMANDERS[sv.cmd], m=Math.floor(sv.t/60), sec=String(sv.t%60).padStart(2,'0'); $('mResumeSub').textContent=`${c?c.name:'Your battle'} · ${m}:${sec} on the clock`; rb.onclick=()=>SPSAVE.resume(); } } }
   const other=setup.faction==='covenant'?'forsaken':'covenant';
   $('mEyebrow').textContent='Skirmish · '+MAP.name; menu.querySelector('.lede').textContent=renderer?LEDES[MAP_ID]:menu.querySelector('.lede').textContent;
   const mb=$('mMap'); mb.innerHTML='';
@@ -7309,8 +6908,9 @@ function renderMenu(){
   const c=COMMANDERS[setup.cmd];
   $('mSum').textContent=`${c.name} against ${setup.foe==='random'?'a random commander':COMMANDERS[setup.foe].name} · ${CONFIG.difficulty[setup.diff].label}`;
 }
-$('mStart').onclick=()=>{ saveSetup(); SPSAVE.clear(); startMatch({...setup}); };
+$('mStart').onclick=()=>{ saveSetup(); startMatch({...setup}); };
 $('compass').onclick=()=>resetView();
+$('mLab').onclick=()=>openLab();
 $('mpCreate').onclick=()=>{ saveSetup(); mpCreate(); };
 $('mpJoinBtn').onclick=()=>{ mpJoin($('mpCodeIn').value); };
 $('mpCodeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('mpJoinBtn').click(); });
@@ -7336,11 +6936,9 @@ function startDemo(){
   newMatch({ faction:'covenant', cmd:c[Math.floor(Math.random()*3)], foe:v[Math.floor(Math.random()*3)], diff:'regular', caps:true },{ aiBoth:true });
   S.demo=true; S.phase='play';
 }
-function toMenu(scr){
-  if(S && !S.demo && !(GFXR.lost)) SPSAVE.clear();   // leaving a battle on purpose forgets its save
+function toMenu(){
   ME=0; SFX.ambient(false); if(NET.active && NET.state!=='idle'){ NET.leave(); } hud.overlay.hidden=true; hudTop.hidden=true; grim.hidden=true; mini.hidden=true; hud.chip.hidden=true; hud.hint.hidden=true; $('toasts').innerHTML='';
   menu.hidden=false; renderMenu(); startDemo();
-  TSC.entered=true; tsShow(typeof scr==='string'?scr:'home'); TITLE.t=0;
   layoutDone=false; layout();
   FS.sync();
 }
@@ -7356,7 +6954,7 @@ function frame(now){
   const dt=Math.min(0.1,(now-last)/1000); last=now;
   fpsN++; fpsT+=dt; if(fpsT>=0.5){ fpsShown=Math.round(fpsN/fpsT); fpsN=0; fpsT=0; }
   try{
-    if(!S.paused && !(GFXR.lost && !NET.active)){   // v18.2: single player holds while the 3D view is being restored
+    if(!S.paused){
       if(S.phase==='countdown'){
         S.countdown-=dt;
         const c=$('count'); if(c) c.textContent=Math.max(1,Math.ceil(S.countdown));
@@ -7376,32 +6974,13 @@ function frame(now){
     }
     if(S.phase==='over' && !S.endShown && now-S.overAt>1600){ S.endShown=true; if(S.demo) startDemo(); else { showEnd(); snd(S.winner===ME?'victory':'defeat'); } }
     render(S.paused?1:acc/STEP,dt);
-    hudT-=dt; if(hudT<=0){ hudT=0.1; hudTick(); MEMV.tick(); }
-  }catch(err){ console.error(err); if(GFXR.down() || /get(Shader|Program)InfoLog/.test(String(err&&err.message))){ GFXR.onLost('frame'); } else if(window.__err && !frame._seen){ frame._seen=true; window.__err('frame: '+err.message+' | '+String(err.stack||'').split('\n').slice(1,3).join(' ')); } }
+    hudT-=dt; if(hudT<=0){ hudT=0.1; hudTick(); }
+  }catch(err){ console.error(err); if(window.__err && !frame._seen){ frame._seen=true; window.__err('frame: '+err.message+' | '+String(err.stack||'').split('\n').slice(1,3).join(' ')); } }
   scheduleFrame();
 }
-/* v18.3 memory readout: what the GPU is holding, for phone screenshots at minute 2 vs minute 10 */
-const MEMV={ on:(()=>{ try{ return localStorage.getItem('cc-mem')==='1'; }catch(_){ return false; } })(), el:null, peakTri:0,
-  toggle(){ this.on=!this.on; try{ localStorage.setItem('cc-mem',this.on?'1':'0'); }catch(_){} if(!this.on && this.el) this.el.hidden=true; },
-  tick(){
-    if(!this.on || !renderer) return;
-    if(!this.el){ const d=document.createElement('div'); d.id='memv'; d.style.cssText='position:fixed;left:max(6px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 118px);z-index:60;pointer-events:none;background:rgba(10,12,16,.78);color:#cfe7c8;font:11px/1.35 ui-monospace,Menlo,monospace;padding:5px 7px;border-radius:6px;white-space:pre'; document.body.appendChild(d); this.el=d; }
-    const i=renderer.info, m=i.memory, r=i.render, pm=performance.memory; this.peakTri=Math.max(this.peakTri,r.triangles);
-    const px=renderer.getDrawingBufferSize?renderer.getDrawingBufferSize(new THREE.Vector2()):{x:0,y:0};
-    this.el.hidden=false;
-    this.el.textContent=`t ${S?Math.floor(S.t/60)+':'+String(Math.floor(S.t%60)).padStart(2,'0'):'-'}  fps ${fpsShown}\n`+
-      `geo ${m.geometries}  tex ${m.textures}  prog ${(i.programs||[]).length}\n`+
-      `calls ${r.calls}  tris ${(r.triangles/1000).toFixed(0)}k (peak ${(this.peakTri/1000).toFixed(0)}k)\n`+
-      `models ${IM.size}  units ${S?S.ents.length:0}  fx ${S?S.fx.length:0}\n`+
-      `buffer ${px.x}x${px.y}  shadows ${SHADOWS()?'on':'off'}  lost ${GFXR.count}\n`+
-      `cap ${FPS_CAP}  outline ${STYLE.outline?'on':'off'}  trees ${CULL.filter(c=>c.m.visible).reduce((a,c)=>a+c.m.count,0)}/${CULL.reduce((a,c)=>a+c.m.count,0)}`+(pm?`\nheap ${(pm.usedJSHeapSize/1048576).toFixed(0)} MB`:'');
-  }
-};
 let rafPending=false;
-let FPS_CAP=(()=>{ try{ const v=localStorage.getItem('cc-fps'); if(v==='30'||v==='60') return +v; }catch(_){} return MOBILE?30:60; })();   // v18.4
-function setFpsCap(v){ FPS_CAP=v; try{ localStorage.setItem('cc-fps',String(v)); }catch(_){} }
-function scheduleFrame(){ if(rafPending) return; rafPending=true; requestAnimationFrame(t=>{ rafPending=false; if(FPS_CAP<=30 && t-lastFrameAt<27){ scheduleFrame(); return; } frame(t); }); }   // 30: skip every other display frame (every 3 of 4 at 120 Hz)
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) SPSAVE.save('hidden'); if(document.hidden && S && !S.demo && (S.phase==='play'||S.phase==='countdown') && !S.paused) togglePause(); if(document.hidden) SFX.ambient(false); else if(S && !S.demo && S.phase==='play') SFX.ambient(true); });
+function scheduleFrame(){ if(rafPending) return; rafPending=true; requestAnimationFrame(t=>{ rafPending=false; frame(t); }); }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && S && !S.demo && (S.phase==='play'||S.phase==='countdown') && !S.paused) togglePause(); if(document.hidden) SFX.ambient(false); else if(S && !S.demo && S.phase==='play') SFX.ambient(true); });
 addEventListener('resize',layout);
 if(window.ResizeObserver){ const ro=new ResizeObserver(()=>{ if(layoutDone) layout(); }); ro.observe(grim); ro.observe(hudTop); }
 addEventListener('orientationchange',()=>setTimeout(layout,150));
@@ -7476,7 +7055,7 @@ for(const ev of ['fullscreenchange','webkitfullscreenchange']) document.addEvent
 
 /* ---------- boot ---------- */
 prerenderMap();
-buildMiniBase(); if(MOBILE){ mapCanvas.width=1; mapCanvas.height=1; }   // v18.4: the minimap keeps its own small copy
+buildMiniBase();
 if(HAS3D){ try{ initThree(); }catch(err){ console.error(err); } }
 if(!renderer){ $('menu').querySelector('.lede').textContent='The 3D engine could not start. Check your connection (it loads from cdnjs.cloudflare.com) and reload the page; on very old devices WebGL may be unavailable.'; }
 renderMenu();
@@ -7488,8 +7067,6 @@ function applyHash(){ const toks=(location.hash||'').replace('#','').split('-'),
   if(MAP_LIST.some(m=>m.id===h) && h!==MAP_ID){ switchMap(h); return; }
   if(has('diag') && renderer){ if(!window.__diag){ const d=document.createElement('div'); d.style.cssText='position:fixed;left:8px;top:120px;z-index:98;background:rgba(0,0,0,.7);color:#9f9;font:12px monospace;padding:4px 6px;white-space:pre'; document.body.appendChild(d); window.__diag=d;
       setInterval(()=>{ const i=renderer.info; d.textContent='calls '+i.render.calls+' tris '+i.render.triangles+' progs '+(i.programs?i.programs.length:'?')+' fog '+(scene.fog?scene.fog.near+'/'+scene.fog.far:'none')+' cam '+Math.round(camera.position.x)+','+Math.round(camera.position.y)+','+Math.round(camera.position.z)+' dist '+Math.round(cam.dist)+' home '+Math.round(cam.home)+' fit '+Math.round(cam.fit)+' th '+Math.round(cam.th)+' view '+view.w+'x'+view.h+' fps '+fpsShown+' shadow '+sun.shadow.mapSize.x+' children '+scene.children.length; },500); } }
-  if(has('mem') && !MEMV.on) MEMV.toggle();
-  if(renderer && !GFXR._test){ if(has('ctxloss')){ GFXR._test=1; GFXR.test(1); } else if(has('ctxloss2')){ GFXR._test=2; GFXR.test(2); } }   // v18.2 context-loss tests
   if(has('plain') && renderer){ scene.fog=null; sun.castShadow=false; renderer.shadowMap.enabled=false; if(fillLight) fillLight.visible=false; scene.traverse(o=>{ if(o.material) o.material.needsUpdate=true; }); }
   { const ck=toks.find(t=>COMMANDERS[t]); if(ck){ setup.cmd=ck; setup.faction=COMMANDERS[ck].faction; } }   // v16: #lab-borvik opens the Library on that commander
   if(renderer && has('sheet')){ // v16: #sheet-<commander> renders every unit of that army as big thumbnails (art review)
@@ -7525,59 +7102,6 @@ function applyViewHash(){ if(!renderer) return; const toks=(location.hash||'').r
     setTimeout(()=>{ setView(...V[0]); const iv=setInterval(()=>{ i++; if(i>=V.length){ clearInterval(iv); return; } setView(...V[i]); },5000); },400); }
   if(toks.includes('tour')){ const V=[[CX,CY,cam.fit,0,54],[1100,560,900,0,50],[1350,1250,1000,0,52],[2200,1300,750,25,36],[1400,2000,950,0,50],[1500,1300,1700,-20,32],[650,1300,1100,0,54],[CX,CY,cam.fit*0.8,180,40]]; let i=0;
     setTimeout(()=>{ setView(...V[0]); const iv=setInterval(()=>{ i++; if(i>=V.length){ clearInterval(iv); return; } setView(...V[i]); },5000); },400); } }
-/* ---------- v19 title screen ---------- */
-const TSC={ el:$('menu'), screen:'splash', entered:false };
-function tsShow(scr){
-  TSC.screen=scr; TSC.el.dataset.screen=scr;
-  for(const p of TSC.el.querySelectorAll('.t-panel')) p.hidden=('p-'+p.dataset.panel)!==scr;
-  if(scr==='home'){ const rs=$('mResume'), f=(rs && !rs.hidden)?rs:TSC.el.querySelector('.t-item[data-go="'+(TSC.last||'skirmish')+'"]'); if(f && !TOUCHUI) setTimeout(()=>f.focus({preventScroll:true}),60); }
-  else if(scr.startsWith('p-')){ const p=TSC.el.querySelector('.t-panel:not([hidden]) .t-pb'); if(p) p.scrollTop=0; const b=TSC.el.querySelector('.t-panel:not([hidden]) .t-back'); if(b && !TOUCHUI) setTimeout(()=>b.focus({preventScroll:true}),60); }
-}
-function tsEnter(){ if(TSC.entered) return; TSC.entered=true; try{ SFX.unlock&&SFX.unlock(); }catch(_){} tsShow('home'); }
-function tsGo(k){
-  TSC.last=k;
-  if(k==='library'){ openLab(); return; }
-  if(k==='skirmish') renderMenu();
-  if(k==='online') mpRefreshMenu();
-  if(k==='settings') tsSettings();
-  tsShow('p-'+k);
-}
-function tsSettings(){
-  const cur=(()=>{ try{ return localStorage.getItem('cc-snd')||'full'; }catch(_){ return 'full'; } })();
-  segButtons($('tSndSeg'),[['full','Full'],['low','Low'],['off','Off']],cur,v=>{ applySnd(v); tsSndIcon(); },tsSettings);
-  segButtons($('tTodSeg'),[['cycle','Cycle'],['day','Day'],['golden','Golden hour'],['moon','Moonlit']],STYLE.tod,v=>{ STYLE.tod=v; saveStyle(); },tsSettings);
-  segButtons($('tTorchSeg'),[[true,'On'],[false,'Off']],STYLE.torches!==false,v=>{ STYLE.torches=v; saveStyle(); },tsSettings);
-  segButtons($('mGfx'),[[true,'High'],[false,'Low']],GFX.high,v=>{ setGfx(v); },tsSettings);
-  segButtons($('tFpsSeg'),[[30,'30 per second'],[60,'60 per second']],FPS_CAP,v=>{ setFpsCap(v); },tsSettings);
-}
-function tsSndIcon(){ const v=(()=>{ try{ return localStorage.getItem('cc-snd')||'full'; }catch(_){ return 'full'; } })(); const b=$('tSnd'); b.dataset.v=v; b.setAttribute('aria-label','Sound: '+v); }
-function tsWho(){
-  const w=$('tWho'), sub=$('tOnlineSub'); if(!w) return;
-  if(MP.platform && MP.user){ w.innerHTML=`<span class="dot"></span>Signed in as <b>${mpEsc(MP.user.displayName||MP.user.handle||'you')}</b>`; if(sub) sub.textContent='Online, with a room code'; }
-  else if(MP.platform){ w.innerHTML=`<a href="/account" target="_top">Sign in</a> to play a friend online`; if(sub) sub.textContent='Sign in on JAYKOBI GAMES to play online'; }
-  else { w.textContent=''; if(sub) sub.textContent='Online on JAYKOBI GAMES'; }
-}
-{ const _r=mpRefreshMenu; mpRefreshMenu=async function(){ await _r(); tsWho(); }; }
-$('tEnterTxt').textContent=TOUCHUI?'Tap to begin':'Press any key';
-{ const mv=document.querySelector('meta[name="cg-version"]'); if(mv) $('tVer').textContent=mv.content; }
-$('tEnter').onclick=tsEnter;
-TSC.el.addEventListener('pointerdown',e=>{ if(TSC.screen==='splash'){ e.preventDefault(); tsEnter(); } });
-for(const b of TSC.el.querySelectorAll('.t-item[data-go]')) b.onclick=()=>tsGo(b.dataset.go);
-for(const b of TSC.el.querySelectorAll('.t-back')) b.onclick=()=>tsShow('home');
-$('tSnd').onclick=()=>{ cycleSnd(); tsSndIcon(); if(TSC.screen==='p-settings') tsSettings(); };
-// keyboard: any key opens, arrows walk the menu, Escape steps back
-document.addEventListener('keydown',e=>{
-  if(menu.hidden) return;
-  if(TSC.screen==='splash'){ if(!e.metaKey && !e.ctrlKey && !e.altKey){ e.preventDefault(); tsEnter(); } return; }
-  if(e.key==='Escape' && TSC.screen.startsWith('p-')){ e.preventDefault(); tsShow('home'); return; }
-  if(TSC.screen==='home' && (e.key==='ArrowDown'||e.key==='ArrowUp')){
-    const items=[...TSC.el.querySelectorAll('.t-item:not(:disabled):not([hidden])')], i=items.indexOf(document.activeElement);
-    const n=i<0?0:(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length; items[n].focus(); e.preventDefault(); }
-},true);
-tsSndIcon();
-// an invite link goes straight to the online panel; a return from a battle skips the opening card
-{ let code=''; try{ code=new URLSearchParams(location.search).get('join')||sessionStorage.getItem('cc-mp-room')||''; }catch(_){}
-  if(mpCleanCode(code).length===5){ TSC.entered=true; tsGo('online'); } }
 applyHash(); applyViewHash(); window.addEventListener('hashchange',()=>{ applyHash(); applyViewHash(); });
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>layout());
 requestAnimationFrame(t=>{ last=t; scheduleFrame(); });
@@ -7585,5 +7109,6 @@ requestAnimationFrame(t=>{ last=t; scheduleFrame(); });
 setInterval(()=>{ const n=performance.now(); if(n-lastFrameAt>400) frame(n); },250);
 })();
 </script>
+
 </body>
 </html>

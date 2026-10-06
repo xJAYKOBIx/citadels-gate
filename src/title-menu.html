@@ -1,0 +1,104 @@
+<div class="menu tscreen" id="menu" data-screen="splash">
+  <div class="t-fade" id="tFade" aria-hidden="true"></div>
+  <div class="t-vig" aria-hidden="true"></div>
+
+  <div class="t-col">
+  <!-- the crest and wordmark, shared by the opening card and the home screen -->
+  <header class="t-logo" id="tLogo">
+    <svg class="t-emb" viewBox="0 0 120 92" aria-hidden="true">
+      <defs><linearGradient id="tEmbG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7e4b0"/><stop offset=".6" stop-color="#e2b54a"/><stop offset="1" stop-color="#9c6a24"/></linearGradient></defs>
+      <g fill="none" stroke="url(#tEmbG)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M60 3v26M52 11h16"/>
+        <path d="M12 86V36h6v-6h5v6h5v-6h5v6h6v50"/>
+        <path d="M81 86V36h6v-6h5v6h5v-6h5v6h6v50"/>
+        <path d="M39 86V48h5v-5h5v5h5v-5h12v5h5v-5h5v5h5v38"/>
+        <path d="M48 86V67a12 12 0 0 1 24 0v19"/>
+        <path d="M54 86V59.6M60 86V55M66 86V59.6M48 72h24M48 79h24" stroke-width="1.7"/>
+        <path d="M4 86h112"/>
+      </g>
+    </svg>
+    <h1 class="t-word"><span class="t-w1"><i aria-hidden="true">†</i>Citadel’s<i aria-hidden="true">†</i></span><span class="t-w2">Gate</span></h1>
+    <p class="t-tag">Hold the gate. Break theirs.</p>
+  </header>
+
+  <!-- home: the main menu -->
+  <nav class="t-nav" id="tNav" aria-label="Main menu">
+    <button class="t-item lead" type="button" id="mResume" hidden><span class="t-k">Resume battle</span><span class="t-s" id="mResumeSub"></span></button>
+    <button class="t-item lead" type="button" data-go="skirmish"><span class="t-k">Skirmish</span><span class="t-s">Battle the AI on Sylvanmere</span></button>
+    <button class="t-item" type="button" data-go="online"><span class="t-k">Play a friend</span><span class="t-s" id="tOnlineSub">Online, with a room code</span></button>
+    <button class="t-item locked" type="button" disabled><span class="t-k">Campaign <svg class="t-lock" viewBox="0 0 12 14" aria-hidden="true"><path d="M3 6V4a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="6" width="9" height="7" rx="1.2" fill="currentColor"/></svg></span><span class="t-s">Coming in a later update</span></button>
+    <button class="t-item" type="button" data-go="library"><span class="t-k">Library</span><span class="t-s">Commanders, units and lore</span></button>
+    <button class="t-item" type="button" data-go="howto"><span class="t-k">How to play</span></button>
+    <button class="t-item" type="button" data-go="settings"><span class="t-k">Settings</span></button>
+  </nav>
+  </div>
+
+  <!-- opening card: the first tap also wakes the sound -->
+  <button class="t-enter" id="tEnter" type="button"><span id="tEnterTxt">Tap to begin</span></button>
+
+  <!-- panels -->
+  <section class="t-panel" id="tpSkirmish" data-panel="skirmish" aria-labelledby="tpSkH" hidden>
+    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow" id="mEyebrow">Skirmish · Sylvanmere</div><h2 id="tpSkH">Skirmish</h2></div></div>
+    <div class="t-pb">
+      <section class="t-field"><h3>Battlefield</h3><p class="t-mapname">Sylvanmere</p><p class="lede"></p><div class="cmds maps" id="mMap" hidden></div></section>
+      <section><h3>Your side</h3><div class="seg t-sides" id="mFaction"></div></section>
+      <section><h3>Commander</h3><div class="cmds" id="mCmd"></div></section>
+      <section><h3>Opponent</h3><div class="seg" id="mFoe"></div></section>
+      <div class="row2">
+        <section><h3>Difficulty</h3><div class="seg" id="mDiff"></div></section>
+        <section><h3>Unit caps</h3><div class="seg" id="mCaps"></div></section>
+      </div>
+    </div>
+    <div class="t-pf"><span class="sum" id="mSum"></span><button class="t-go" id="mStart" type="button">Begin battle</button></div>
+  </section>
+
+  <section class="t-panel" id="tpOnline" data-panel="online" aria-labelledby="tpOnH" hidden>
+    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Online · 1 v 1</div><h2 id="tpOnH">Play a friend</h2></div></div>
+    <div class="t-pb mp-menu">
+      <p class="t-who mp-who" id="mpWho">Checking your sign-in…</p>
+      <section class="t-card"><h3>Host a battle</h3><p class="lnote">You get a five-letter code and a link to send. You'll both choose commanders in the room; your friend leads the other faction.</p>
+        <div class="mp-row"><button class="btn primary" id="mpCreate" disabled>Create a room</button><button class="btn" id="mpResume" hidden>Resume saved match</button></div></section>
+      <section class="t-card"><h3>Join a battle</h3>
+        <div class="mp-row"><input id="mpCodeIn" class="mp-in code" maxlength="5" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Room code"><button class="btn" id="mpJoinBtn" disabled>Join</button></div>
+        <p class="lnote mp-msg" id="mpMsg" role="status"></p></section>
+      <p class="lnote">Both players need a JAYKOBI GAMES account. If a connection drops, the battle pauses and picks up again when the player returns.</p>
+    </div>
+  </section>
+
+  <section class="t-panel" id="tpSettings" data-panel="settings" aria-labelledby="tpSeH" hidden>
+    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Options</div><h2 id="tpSeH">Settings</h2></div></div>
+    <div class="t-pb">
+      <section><h3>Graphics</h3><div class="seg" id="mGfx"></div><p class="lnote">Low turns off shadows and some effects. Use it if a phone runs hot.</p></section>
+      <section><h3>Sound</h3><div class="seg" id="tSndSeg"></div></section>
+      <section><h3>Frame rate</h3><div class="seg" id="tFpsSeg"></div><p class="lnote">30 saves battery and keeps phones cooler.</p></section>
+      <section><h3>Time of day in battle</h3><div class="seg" id="tTodSeg"></div><p class="lnote">Cycle runs from daylight to golden hour, night and dawn over a long battle. Looks only.</p></section>
+      <section><h3>Torches and lanterns</h3><div class="seg" id="tTorchSeg"></div></section>
+      <section><h3>Screen</h3><div class="seg"><button class="btn" id="mFs" type="button" hidden>Fullscreen</button></div></section>
+    </div>
+  </section>
+
+  <section class="t-panel" id="tpHowto" data-panel="howto" aria-labelledby="tpHoH" hidden>
+    <div class="t-ph"><button class="t-back" type="button" aria-label="Back to the main menu">‹</button><div><div class="eyebrow">Field manual</div><h2 id="tpHoH">How to play</h2></div></div>
+    <div class="t-pb how" id="how">
+      <dl>
+        <dt>Deploy</dt><dd>Tap a card in the Grimoire, then tap the map (or drag the card there). Every unit marches out of your keep's gate (flyers lift off the keep) at double speed until it clears the blue circle around your stronghold. Drop inside the circle and it goes to that spot; anywhere else: fighters dropped on a lane march that lane, casters, caravans and anti-air walk to the spot and hold it, and flyers fly there and circle.</dd>
+        <dt>Command</dt><dd>Press on one of your units and drag to draw its path. Release to send it. Close the loop to make it patrol. End on an enemy to attack it.</dd>
+        <dt>Flyers</dt><dd>Flyers never stop. Draw their path across enemy ground to strafe or breathe fire along it; without orders they circle and chase nearby flyers.</dd>
+        <dt>Lanes</dt><dd>Wave infantry march both lanes on their own. Fighting units dropped on a lane march it automatically, and so does any unit you walk back onto a lane. Units left off the lane hold their ground until you give them a path.</dd>
+        <dt>Hidden paths</dt><dd>On Sylvanmere a hidden path leaves each of your lanes, slips through the woods to the Hidden Ford and comes out on the enemy's far lane. Draw a path along one to strike where they aren't looking.</dd>
+        <dt>Gold</dt><dd>Gold fills on its own up to 30 and stops when full, so keep spending. Relic caches appear on the rune circles; move a ground unit onto one for 10–25 gold.</dd>
+        <dt>Ranks</dt><dd>You start at Rank I with the scout and the front line. Break the Rank II seal (12 gold) for spawners, flyers and casters, then the Rank III seal (25 gold) and the Rank IV seal (28 gold) for much stronger units. You can field up to 4 of each Rank I–II unit, 2 of each Rank III and 1 of each Rank IV at a time.</dd>
+        <dt>High ground</dt><dd>Units on higher ground shoot 20% farther and hit 25% harder, and units below can't target them unless they come close. Casters and flyers ignore height. Each lane has a nest above it for your mages.</dd>
+        <dt>Reading the field</dt><dd>Zoom out and every fighting unit shows a badge with its portrait, a ring in its side's colour and a health ring when hurt. Gold pips mark Rank III and IV units.</dd>
+        <dt>Power</dt><dd>Your commander's strike (24 gold, 60 s cooldown) hits anywhere on the map. Tap it, then tap a target.</dd>
+        <dt>Camera</dt><dd>On a phone or tablet, hold it sideways like a controller: the view always faces the enemy stronghold, drag to pan and pinch to zoom. Zooming out lifts the camera high over the whole field; zooming in drops it down among the troops. Double-tap to switch between the whole field and a close view, and tap the minimap to jump. With a mouse: drag to pan, scroll to zoom, right-drag to turn and tilt (or Q/E and Z/X), C to reset.</dd>
+      </dl>
+      <p>Counters matter: flyers shred infantry and caravans, anti-air shreds flyers, casters punish clumps from out of tower range, scouts kill unguarded casters, cannons and beetles kill armor.</p>
+    </div>
+  </section>
+
+  <footer class="t-foot">
+    <span class="t-acct" id="tWho"></span>
+    <span class="t-meta"><button class="t-ico" id="tSnd" type="button" aria-label="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w1" d="M16 9.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="x" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="t-ver" id="tVer">v19</span></span>
+  </footer>
+</div>
