@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="cg-version" content="v19">
+<meta name="cg-version" content="v20">
 <title>Citadel's Gate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -742,10 +742,10 @@ html.title #cv{visibility:hidden;}
         <dt>Lanes</dt><dd>Wave infantry march both lanes on their own. Fighting units dropped on a lane march it automatically, and so does any unit you walk back onto a lane. Units left off the lane hold their ground until you give them a path.</dd>
         <dt>Hidden paths</dt><dd>On Sylvanmere a hidden path leaves each of your lanes, slips through the woods to the Hidden Ford and comes out on the enemy's far lane. Draw a path along one to strike where they aren't looking.</dd>
         <dt>Gold</dt><dd>Gold fills on its own up to 30 and stops when full, so keep spending. Relic caches appear on the rune circles; move a ground unit onto one for 10–25 gold.</dd>
-        <dt>Ranks</dt><dd>You start at Rank I with the scout and the front line. Break the Rank II seal (12 gold) for spawners, flyers and casters, then the Rank III seal (25 gold) and the Rank IV seal (28 gold) for much stronger units. You can field up to 4 of each Rank I–II unit, 2 of each Rank III and 1 of each Rank IV at a time.</dd>
+        <dt>Ranks</dt><dd>You start at Rank I with the scout and the troop wagon. Break the Rank II seal (12 gold) for the front line, flyers and casters, then the Rank III seal (25 gold) and the Rank IV seal (28 gold) for much stronger units. You can field up to 4 of each Rank I–II unit, 2 of each Rank III and 1 of each Rank IV at a time.</dd>
         <dt>High ground</dt><dd>Units on higher ground shoot 20% farther and hit 25% harder, and units below can't target them unless they come close. Casters and flyers ignore height. Each lane has a nest above it for your mages.</dd>
         <dt>Reading the field</dt><dd>Zoom out and every fighting unit shows a badge with its portrait, a ring in its side's colour and a health ring when hurt. Gold pips mark Rank III and IV units.</dd>
-        <dt>Power</dt><dd>Your commander's strike (24 gold, 60 s cooldown) hits anywhere on the map. Tap it, then tap a target.</dd>
+        <dt>Power</dt><dd>Your commander's strike unlocks with the Rank IV seal (28 gold, 60 s cooldown) and hits anywhere on the map, leaving the ground burning for a few seconds. It can batter a keep but never finish one. Tap it, then tap a target.</dd>
         <dt>Camera</dt><dd>On a phone or tablet, hold it sideways like a controller: the view always faces the enemy stronghold, drag to pan and pinch to zoom. Zooming out lifts the camera high over the whole field; zooming in drops it down among the troops. Double-tap to switch between the whole field and a close view, and tap the minimap to jump. With a mouse: drag to pan, scroll to zoom, right-drag to turn and tilt (or Q/E and Z/X), C to reset.</dd>
       </dl>
       <p>Counters matter: flyers shred infantry and caravans, anti-air shreds flyers, casters punish clumps from out of tower range, scouts kill unguarded casters, cannons and beetles kill armor.</p>
@@ -754,7 +754,7 @@ html.title #cv{visibility:hidden;}
 
   <footer class="t-foot">
     <span class="t-acct" id="tWho"></span>
-    <span class="t-meta"><button class="t-ico" id="tSnd" type="button" aria-label="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w1" d="M16 9.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="x" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="t-ver" id="tVer">v19</span></span>
+    <span class="t-meta"><button class="t-ico" id="tSnd" type="button" aria-label="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w1" d="M16 9.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="x" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="t-ver" id="tVer">v20</span></span>
   </footer>
 </div>
 
@@ -788,7 +788,7 @@ const CONFIG = {
   keepWardedUntilLaneBreached: true,   // assumption (PSU review): base falls "after eliminating their defensive structures"
   gold:  { start:10, every:0.95, cap:30 },                  // v15: a little more income (1.91 s in game) so sturdier towers don't drag matches out
   seals: { 2:12, 3:25, 4:28 },                              // v15: matches start at Rank I; the Rank II seal is the first unlock
-  super: { cost:24, cooldown:60, delay:1.4, structMult:0.4 }, // cost from Patch 05; cooldown/structure damage est.
+  super: { cost:28, cooldown:60, delay:1.4, structMult:0.4, rank:4, keepFloor:0.1 }, // v20: unlocked by the Rank IV seal, 28 gold; never takes a keep below 10%
   waves: { squad:3, every:14, first:1.5, stagger:0.45 },    // auto-infantry per lane (3 lanes); tuned so paid units matter more
   caps:  { total:16, byRank:{1:4,2:4,3:2,4:1} },            // per-type caps by rank: 4 / 4 / 2 / 1 alive
   zone:  0.35,                                              // (old half-map territory; only used to lay out lane dressing now)
@@ -852,8 +852,8 @@ const CORE_SLOTS=['scout','line','spawner','flyer','caster','aa'];
 // v14: one core stat line for both factions (the old Forsaken asymmetries are gone); only the looks differ per faction
 const CORE_BASE={
   scout:  { cls:'light', hp:90, speed:138, dmg:4, interval:0.33, range:65, targets:'ground', cost:4, rank:1, shape:'rider', r:7, scout:true, role:'scout', proj:'tracer' },
-  line:   { cls:'heavy', hp:265, speed:60, dmg:11, interval:1.0, range:100, targets:'ground', cost:9, rank:1, shape:'tank', r:10, role:'line', proj:'bolt' },
-  spawner:{ cls:'light', hp:60, speed:115, targets:'none', cost:7, rank:2, shape:'wagon', r:9, spawns:{n:3,every:14}, role:'caravan' },
+  line:   { cls:'heavy', hp:230.5, speed:60, dmg:9.566, interval:1.0, range:100, targets:'ground', cost:9, rank:2, shape:'tank', r:9.375, role:'line', proj:'bolt' },   // v20: Rank II (was I); base stats ÷1.15 so it is the same 265 hp / 11 dmg unit
+  spawner:{ cls:'light', hp:69, speed:115, targets:'none', cost:7, rank:1, shape:'wagon', r:9.6, spawns:{n:3,every:14}, role:'caravan' },   // v20: Rank I (was II); base stats ×1.15 so it is the same 69 hp wagon
   flyer:  { cls:'air', air:true, hp:170, speed:180, dmg:6.5, interval:0.5, range:75, arc:55, targets:'both', cost:9, rank:2, shape:'fighter', r:9, turn:3.2, fighter:true, vs:FIGHTER_VS, tag:'fighter', role:'air', proj:'tracer' },
   caster: { cls:'light', hp:50, speed:85, dmg:28, interval:2.5, range:200, minRange:60, splash:40, targets:'ground', stationary:true, noLOS:true, cost:12, rank:2, shape:'star', r:7, tag:'caster', vs:{inf:1.3}, prefer:['specialty','inf'], role:'caster' },
   aa:     { cls:'light', hp:60, speed:85, dmg:8, interval:0.5, range:160, targets:'air', cost:15, rank:3, shape:'aa', r:9, tag:'aa', role:'aa', proj:'bolt' },
@@ -936,10 +936,10 @@ const UNITS = {
 };
 const FACTIONS = {
   covenant:{ key:'covenant', name:'Covenant', keep:'Covenant Keep', tower:'Watchtower',
-    super:{ name:'Divine Judgment', short:'Judgment', radius:105, dmg:380, style:'judgment' },
+    super:{ name:'Divine Judgment', short:'Judgment', radius:130, dmg:480, style:'judgment', burn:{ r:0.85, dps:26, t:4 } },   // v20: wider, harder, consecrated ground burns for 4 s
     pal:{ body:'#2f6fd6', rim:'#e2b54a', dark:'#1b3f82', light:'#a9c8ff', stone:'#a3a9b0', proj:'#fff0b8', rgb:'226,181,74' } },
   forsaken:{ key:'forsaken', name:'Forsaken', keep:'Forsaken Citadel', tower:'Bone Spire',
-    super:{ name:'Meteor', short:'Meteor', radius:80, dmg:420, style:'meteor' },
+    super:{ name:'Meteor', short:'Meteor', radius:100, dmg:540, style:'meteor', burn:{ r:0.8, dps:36, t:4 } },   // v20: wider, harder, the crater burns for 4 s
     pal:{ body:'#8e2630', rim:'#e3d6b8', dark:'#4c1117', light:'#ffb0b6', stone:'#8a8480', proj:'#a6f5c0', rgb:'227,214,184' } },
 };
 const COMMANDERS = {
@@ -1357,17 +1357,17 @@ function buildSylvan(){
   // ---- landforms (west half): wooded rims, a few mossy crags, the Elder Oak rise ----
   const RANGES0=[
     { name:'the North Rim', pts:[[-200,40],[500,10],[1100,60],[1700,20],[2300,60],[3000,30]], H:170, w:190, lump:220 },
-    { name:'Mossy crag', pts:[[560,900],[640,980]], H:70, w:60, p:1.3 },
+    { name:'Mossy crag', pts:[[690,930],[740,990]], H:70, w:60, p:1.3 },   // v20: moved clear of the courtyard wall
     { name:'Mossy crag', pts:[[1180,1360],[1120,1460]], H:75, w:62, p:1.3 },
     { name:'Mossy crag', pts:[[1060,220],[1180,260]], H:90, w:70, p:1.3 },
   ];
-  const HILLS0=[ { x:KX, y:KY, r:300, H:40 }, { x:1000, y:860, r:150, H:18 }, { x:620, y:1250, r:160, H:16 } ];
+  const HILLS0=[ { x:KX, y:KY, r:430, H:40 }, { x:1000, y:860, r:150, H:18 }, { x:720, y:1290, r:150, H:16 } ];   // v20: the knoll between the lanes moved clear of the courtyard
   const MESAS0=[ { name:'the Elder Oak', pts:[[940,730],[1030,770]], top:90, w:34, edge:28 }, { name:'the Willow Knoll', pts:[[1015,1575],[1095,1605]], top:90, w:34, edge:28 } ];
   const def={ w:MW, h:MH, seed:31, base:20, roll:12, bump:3,
     ranges:mirrorAll(RANGES0,r=>({...r, pts:r.pts.map(Rxy)})), hills:mirrorAll(HILLS0,Mp), mesas:mirrorAll(MESAS0,m=>({...m, pts:m.pts.map(Rxy)})),
     river:RIVER, gorge:{ floor:-4, fw:44, slope:0.5, bed:-26 }, fords:[[CY-70,CY+70,-9]],
     roads,
-    pads:[ ...mirrorAll([{ x:KX, y:KY, r:190, h:KH, edge:80, early:true }, { x:985, y:748, r:22, h:90, edge:10 }, { x:1050, y:1588, r:22, h:90, edge:10 }],Mp) ],
+    pads:[ ...mirrorAll([{ x:KX, y:KY, r:300, h:KH, edge:90, early:true }, { x:985, y:748, r:22, h:90, edge:10 }, { x:1050, y:1588, r:22, h:90, edge:10 }],Mp) ],
   };
   const laneN=resamplePoly(splineSample(NF,6).pts,40), laneS=resamplePoly(splineSample(SF,6).pts,40);
   const lanes=[laneN, laneS];
@@ -1384,12 +1384,12 @@ function buildSylvan(){
   return {
     id:'sylvan', name:'Sylvanmere', w:MW, h:MH, platH:40, laneMirror:LANE_MIRROR, terrain:'hf', biome:'enchanted',
     hf:gen.hf, rough:gen.rough, hfW:gen.TW, hfH:gen.TH, roads:gen.roads, trails:TR, ranges:def.ranges, mesas:def.mesas,
-    zoneR:420, speedMult:0.85, viewSpan:1400, step:11, midTower:{ hp:1, dmg:1 },
+    zoneR:420, wallR:295, speedMult:0.85, viewSpan:1400, step:11, midTower:{ hp:1, dmg:1 },
     keeps:[{x:KX,y:KY},{x:MW-KX,y:MH-KY}],
     lanes, laneNames:['North','South'],
     towers:[...TOWERS0.map(t=>({...t,team:0})), ...TOWERS0.map(t=>({...Rp(t),team:1,lane:LANE_MIRROR[t.lane]}))],
     plateaus:[], ramps:[], links:[],
-    rocks:mirrorAll([ {x:1000,y:1180,r:26}, {x:560,y:1020,r:22} ],Rp),
+    rocks:mirrorAll([ {x:1000,y:1180,r:26}, {x:690,y:1080,r:22} ],Rp),
     // the woods: thick along the hidden paths (so they really are hidden), on the rims and between the lanes
     forests:mirrorAll([ {x:810,y:880,r:125,name:'the Elder Wood'}, {x:930,y:990,r:110}, {x:1080,y:1050,r:105}, {x:1240,y:1090,r:95},
                         {x:880,y:1470,r:125,name:'the Willow Wood'}, {x:1050,y:1300,r:110}, {x:1200,y:1200,r:100},
@@ -1400,7 +1400,11 @@ function buildSylvan(){
     houses:mirrorAll([ {x:640,y:820,w:36,h:24}, {x:1230,y:1680,w:30,h:40} ],Rrect),
     farms:[],
     landmarks:mirrorAll([ {kind:'watch',x:1010,y:752,a:0}, {kind:'watch',x:1078,y:1596,a:0.3}, {kind:'chapel',x:1400,y:300,a:.2}, {kind:'mill',x:1160,y:1890,a:-.4} ],l=>({...l, x:MW-l.x, y:MH-l.y, a:l.a+Math.PI})),
-    camp:{ tents:[{x:150,y:KY-100},{x:135,y:KY},{x:150,y:KY+100}], fire:{x:195,y:KY},
+    // v20: the camp lives inside the courtyard — the old three tents and fire behind the keep, a second fire with its own
+    // tents in the south-west, a supply corner in the north-west and crates by the tents
+    camp:{ tents:[{x:150,y:KY-100},{x:135,y:KY},{x:150,y:KY+100}, {x:180,y:KY+200},{x:280,y:KY+245},{x:235,y:KY+145}, {x:215,y:KY-200},{x:275,y:KY-225}],
+           fire:{x:195,y:KY}, fires:[{x:230,y:KY+210}],
+           crates:[{x:180,y:KY-150},{x:300,y:KY-180},{x:110,y:KY+50},{x:205,y:KY+125},{x:300,y:KY+205}],
            banners:[{x:KX-80,y:KY-160},{x:KX+80,y:KY-160},{x:KX+170,y:KY-60},{x:KX+170,y:KY+60},{x:KX-80,y:KY+160},{x:KX+80,y:KY+160},
                     ...TOWERS0.filter(t=>t.slot==='outer').map(t=>({x:t.x+26,y:t.y+26}))] },
     river:{ ...RIVER, crossings:[[470,620,'bridge'],[CY-70,CY+70,'ford'],[MH-620,MH-470,'bridge']] },   // Elder Bridge, the Hidden Ford, Willow Bridge
@@ -1434,6 +1438,7 @@ function linkProject(l,x,y){
 }
 // per-map tuning (the pass is much bigger: longer reach from home, quicker marching)
 if(MAP.zoneR) CONFIG.zoneR=MAP.zoneR;
+if(MAP.wallR) CONFIG.keep.wallR=MAP.wallR;   // v20: Sylvanmere's keeps sit in a real courtyard (wall 2.5x farther out)
 if(MAP.viewSpan) CONFIG.view.span=MAP.viewSpan;
 if(MAP.midTower) CONFIG.midTower=MAP.midTower;
 if(MAP.speedMult){ for(const d of Object.values(UNITS)) d.speed*=MAP.speedMult; for(const d of Object.values(INF)) d.speed*=MAP.speedMult; }
@@ -1966,7 +1971,7 @@ function newMatch(setup,opts={}){
   const prevDebug=S?S.debug:false;
   S={ setup, seed, rs:seed|0, t:0, phase:opts.menu?'menu':'countdown', countdown:CONFIG.countdown,
       speed:1, paused:false, debug:prevDebug, caps:setup.caps!==false,
-      teams:[], ents:[], projs:[], fx:[], corpses:[], queue:[], strikes:[], caches:[], cacheTimer:0, nextId:1,
+      teams:[], ents:[], projs:[], fx:[], corpses:[], queue:[], strikes:[], burns:[], caches:[], cacheTimer:0, nextId:1,
       spawnTimer:[CONFIG.waves.first,CONFIG.waves.first], keeps:[], towers:[],
       winner:-1, overAt:0, endShown:false, shake:0, selected:null, armed:null, armedSuper:false };
   S.rnd=makeRng(S);
@@ -2717,7 +2722,7 @@ function stepProjectiles(dt){
 /* ---------- commander strikes ---------- */
 function fireSuper(team,x,y){
   const T=S.teams[team], C=CONFIG.super;
-  if(T.superCd>0 || T.gold<C.cost) return false;
+  if(T.rank<C.rank || T.superCd>0 || T.gold<C.cost) return false;
   T.gold-=C.cost; T.superCd=C.cooldown; T.stats.supers++;
   const sp=T.faction.super;
   S.strikes.push({ team, x, y, t:C.delay, max:C.delay, radius:sp.radius, dmg:sp.dmg, style:sp.style }); snd('superCast',null,null,{vol:1});
@@ -2727,6 +2732,16 @@ function fireSuper(team,x,y){
 function stepStrikes(dt){
   for(const s of S.strikes){ s.t-=dt; if(s.t<=0 && !s.done){ s.done=true; detonate(s); } }
   S.strikes=S.strikes.filter(s=>!s.done);
+  // v20: the strike leaves the ground burning — ground units (not structures) inside take damage every tick for a few seconds
+  if(!S.burns) S.burns=[];
+  for(const b of S.burns){
+    b.t-=dt; const src={ team:b.team, def:null, tag:'super' };
+    for(const e of S.ents){ if(e.team===b.team || !isTargetable(e) || isAir(e) || isStruct(e)) continue; if(Math.hypot(e.x-b.x,e.y-b.y)<=b.r+e.r) dealDamage(src,e,b.dps*dt); }
+    if(!headless && Math.random()<dt*1.6) S.fx.push({type:'ring',x:b.x,y:b.y,r0:b.r*.82,r1:b.r,life:.6,max:.6,color:b.style==='judgment'?'255,236,170':'255,120,60'});   // v20: the burning ground pulses so it reads as a no-go zone
+    if(!headless && Math.random()<dt*(b.style==='judgment'?26:32)){ const a=Math.random()*TAU, r=Math.sqrt(Math.random())*b.r;
+      fx('fire',b.x+Math.cos(a)*r,b.y+Math.sin(a)*r,{ z:1, vz:30+Math.random()*30, life:.5+Math.random()*.3, size:b.style==='judgment'?5:6, c:b.style==='judgment'?'#fff2c0':null }); }
+  }
+  S.burns=S.burns.filter(b=>b.t>0);
 }
 function detonate(s){
   const src={ team:s.team, def:null, tag:'super' }; snd('superHit',s.x,s.y,{vol:1.4});
@@ -2735,8 +2750,11 @@ function detonate(s){
     const dd=Math.hypot(e.x-s.x,e.y-s.y); if(dd>s.radius+e.r) continue;
     let dmg=s.dmg*(1-0.5*clamp(dd/s.radius,0,1));
     if(isStruct(e)) dmg*=CONFIG.super.structMult;
-    dealDamage(src,e,dmg);
+    if(e.kind==='keep') dmg=Math.min(dmg,Math.max(0,e.hp-(CONFIG.super.keepFloor||0)*e.maxHp));   // v20: softens a keep, never finishes it
+    if(dmg>0) dealDamage(src,e,dmg);
   }
+  const bn=(S.teams[s.team].faction.super||{}).burn;
+  if(bn) (S.burns||(S.burns=[])).push({ team:s.team, x:s.x, y:s.y, r:s.radius*bn.r, dps:bn.dps, t:bn.t, style:s.style });
   const judg=s.style==='judgment';
   const cols=judg?['#fff6d0','#ffe08a','#ffffff','#9cc2ff']:['#ffb347','#ff6a2b','#6d737a','#ffe0a0'];
   if(!headless){
@@ -2956,7 +2974,7 @@ function restoreState(snap,opts={}){
   const byId=new Map(), mk=e=>{ const o={}; for(const [k,v] of Object.entries(e)) o[k]=k==='def'?defOf(v):v; byId.set(o.id,o); return o; };
   const raw=snap.ents.map(mk), ghosts=(snap.ghosts||[]).map(mk);
   for(const o of raw.concat(ghosts)) for(const k of Object.keys(o)){ if(k==='def') continue; o[k]=unpackVal(o[k],byId); }
-  for(const c of S.caches) for(const k of Object.keys(c)) c[k]=unpackVal(c[k],byId);
+  for(const c of S.caches) for(const k of Object.keys(c)) c[k]=k==='claim'&&Array.isArray(c[k])?c[k].map(x=>unpackVal(x,byId)):unpackVal(c[k],byId);   // v20: claims are per team (positional) — dropping a null shifted team 1's claim onto team 0
   S.ents=raw; S.keeps=raw.filter(e=>e.kind==='keep'); S.towers=raw.filter(e=>e.kind==='tower');
   // v18.1: match-level state (projectiles in flight, the spawn queue…) resolves its entity refs only now that the entities exist
   for(const [k,v] of Object.entries(snap)){ if(['v','map','setup','seed','rs','teams','ents','caches','ghosts'].includes(k)) continue; S[k]=unpackVal(v,byId); }
@@ -3305,7 +3323,7 @@ function aiThink(team){
     myCasters:role('caster'), myAir:mine.filter(isAir).length, myBombers:role('bomber') };
   // danger near home?
   const myKeep=S.keeps[team];
-  ctx.emergency = mine.length<2 && S.t>60 || S.ents.some(e=>e.team===E && !e.dead && (e.kind==='unit'||e.kind==='inf') && Math.hypot(e.x-myKeep.x,e.y-myKeep.y)<300);
+  ctx.emergency = mine.length<2 && S.t>60 || S.ents.some(e=>e.team===E && !e.dead && (e.kind==='unit'||e.kind==='inf') && Math.hypot(e.x-myKeep.x,e.y-myKeep.y)<Math.max(300,CONFIG.keep.wallR+80));   // v20: at the courtyard gates counts as home
   aiLanes(team,ctx);
   aiCaches(team,ctx);
   aiSeals(team,ctx);
@@ -3370,7 +3388,7 @@ function aiSeals(team,ctx){
   const T=S.teams[team], A=T.ai, rec=A.diffKey==='recruit';
   A.saveFor=0;
   if(T.rank===1){
-    // v15: the Rank II seal opens spawners, flyers and casters; the AI takes it early, once it has a couple of units out
+    // v15/v20: the Rank II seal opens the front line, flyers and casters; the AI takes it early, once it has a couple of units out
     if(S.t>(rec?70:40) && ctx.mine.length>=2){
       if(T.gold>=CONFIG.seals[2]) buySeal(team); else if(!ctx.emergency) A.saveFor=CONFIG.seals[2];
     }
@@ -3383,11 +3401,14 @@ function aiSeals(team,ctx){
     if(S.t>(rec?370:260) && ctx.mine.length>=4){
       if(T.gold>=CONFIG.seals[4]) buySeal(team); else if(!ctx.emergency) A.saveFor=CONFIG.seals[4];
     }
+  } else if(T.rank>=CONFIG.super.rank){
+    // v20: the strike is a late, costly unlock — with an army in the field the AI banks for it rather than spending every coin
+    if(T.superCd<=0 && !ctx.emergency && ctx.mine.length>=(rec?7:5) && S.t>=(A.ultHold||0)) A.saveFor=CONFIG.super.cost;
   }
 }
 function aiSuper(team,ctx){
   const T=S.teams[team], A=T.ai, E=1-team;
-  if(T.superCd>0 || T.gold<CONFIG.super.cost) return;
+  if(T.rank<CONFIG.super.rank || T.superCd>0 || T.gold<CONFIG.super.cost) return;
   const r=T.faction.super.radius;
   const cands=S.ents.filter(e=>e.team===E && !e.dead && ((e.kind==='unit'&&!e.def.air)||e.kind==='inf'));
   let best=null, bs=0;
@@ -3396,8 +3417,11 @@ function aiSuper(team,ctx){
     for(const e of cands) if(Math.hypot(e.x-c.x,e.y-c.y)<r*0.8) s+=e.kind==='unit'?e.def.cost/6:0.5;
     if(s>bs){ bs=s; best=c; }
   }
-  const thresh=A.diffKey==='veteran'?3.5:A.diffKey==='regular'?4.5:6;
-  if(best && bs>=thresh) fireSuper(team,best.x,best.y);
+  let thresh=A.diffKey==='veteran'?3.5:A.diffKey==='regular'?4.5:6;
+  if(ctx.emergency) thresh*=0.6;                                   // v20: a crowd at the gates is worth the strike
+  else if(T.gold>=CONFIG.gold.cap-1) thresh*=0.7;                  // banked a full purse for it: take a good-enough target
+  if(best && bs>=thresh){ fireSuper(team,best.x,best.y); return; }
+  if(T.gold>=CONFIG.gold.cap){ A.ultHold=S.t+25; }                 // nothing worth hitting with a full purse: spend, try again later
 }
 function aiChoose(team,ctx,roster){
   const T=S.teams[team], A=T.ai, counter=S.rnd()<A.diff.counter;
@@ -3418,7 +3442,7 @@ function aiChoose(team,ctx,roster){
       case 'air':     x=ctx.myAir<4?1.8:0.5; if(ctx.foeAA>0) x*=ctx.foeAA>=2?0.3:0.55; break;   // v14: anti-air on the field makes flyers a poor buy
       case 'caster':  x=ctx.myCasters<3?2:0.4; break;
       case 'aa':      x=ctx.foeAir>0&&ctx.myAA<2?1.4:0.12; break;
-      case 'at':      x=ctx.foeHeavy>0?1.8:0.5; break;
+      case 'at':      x=ctx.foeHeavy>0?(ctx.myAT<2?1.8:0.45):0.5; break;   // v20: two anti-armour guns are enough; a third slow gun just feeds
       case 'bomber':  x=ctx.myBombers<2?2.4:0.3; break;
       case 'diver':   x=1.6; break;
     }
@@ -3476,7 +3500,7 @@ function aiRally(team,ctx){
   const T=S.teams[team], A=T.ai, E=1-team; A.rallyT=A.rallyT||{};
   for(const lane of LANE_IDS){
     if(towersAlive(E,lane).length) continue;
-    const L=LANES[team][lane], rs=L.len-(CONFIG.keep.wallR+CONFIG.keep.range+150);
+    const L=LANES[team][lane], rs=L.len-Math.max(CONFIG.keep.wallR+150,CONFIG.keep.wallR+CONFIG.keep.range+150-Math.max(0,CONFIG.keep.wallR-150)*1.5);   // v20: outside the gate; a wide courtyard wall is beyond the keep's reach
     const want=A.diffKey==='recruit'?3:4;
     const group=ctx.mine.filter(u=>!u.def.air && u.def.targets!=='none' && u.def.role!=='caster' && !u.def.stationary && !u.aiCache && ((u.laneMode&&u.lane===lane)||u.aiLane===lane));
     const held=group.filter(u=>u.rally), near=group.filter(u=>laneProject(L,u.x,u.y).s>rs-90);
@@ -4858,6 +4882,13 @@ function buildTent(f){
   add(b,GEO.cone4,'#f4f7fa',0,16.5,0,5.2,5,5.2,0,Math.PI/4,0);
   return merge(b,'toy');
 }
+function buildCrates(){   // v20: a stack of supply crates, a barrel and a sack for the courtyard camp
+  const b=B();
+  for(const [x,y,z,s,r] of [[0,3,0,6,0],[7,3,1,6,.3],[3.5,9,.5,5.5,.15],[-6,2.5,-5,5,.6]]){ add(b,GEO.box,'#8a6a4e',x,y,z,s,s,s,0,r,0); add(b,GEO.box,'#5a3e2b',x,y+s/2+.1,z,s+.2,.4,s+.2,0,r,0); }
+  add(b,GEO.cyl,'#6b4a33',-4,4.5,6,3,9,3); add(b,GEO.cyl,'#553a26',-4,9.2,6,3.1,.5,3.1);
+  add(b,GEO.sph6,'#cdb88f',9,2.2,-6,3.4,2.6,3);
+  return merge(b,'toy');
+}
 function buildCampfire(){
   const b=B();
   for(let i=0;i<8;i++){ const a=i*TAU/8; add(b,GEO.dod,'#7d8288',Math.cos(a)*7,1.2,Math.sin(a)*7,2,1.4,2); }
@@ -5187,16 +5218,17 @@ function makeWaterTexture(){
 function steepAt(x,y){ return HFMAP && Math.abs(heightAt(x+10,y)-heightAt(x-10,y))+Math.abs(heightAt(x,y+10)-heightAt(x,y-10))>7; }
 function buildDressing(){
   const rnd=mulberry32(321), dm=new THREE.Object3D();
-  const tents0=MAP.camp.tents, fire0=MAP.camp.fire, banners0=MAP.camp.banners;
+  const tents0=MAP.camp.tents, fire0=MAP.camp.fire, banners0=MAP.camp.banners, fires0=[fire0,...(MAP.camp.fires||[])], crates0=MAP.camp.crates||[];
+  const nearFire=(p,fl)=>{ let b=fl[0], bd=1e9; for(const f of fl){ const d=Math.hypot(f.x-p.x,f.y-p.y); if(d<bd){ bd=d; b=f; } } return b; };
   const put=(geo,list,scale=1,rot=null,shadow=true)=>{ const m=new THREE.InstancedMesh(geo,propMat,list.length); list.forEach((p,i)=>{ dm.position.set(p.x,heightAt(p.x,p.y),p.y); dm.rotation.set(0,rot?rot(p):rnd()*TAU,0); dm.scale.setScalar(p.s??scale); dm.updateMatrix(); m.setMatrixAt(i,dm.matrix); }); m.castShadow=shadow; m.receiveShadow=true; scene.add(m); return m; };
   // camps and banners per side (faction colours are fixed by map side for the match; rebuilt when factions change)
   dressingGroup=new THREE.Group(); scene.add(dressingGroup);
   rebuildFactionDressing=function(fk0,fk1){
     while(dressingGroup.children.length){ const c=dressingGroup.children[0]; dressingGroup.remove(c); try{ c.dispose&&c.dispose(); }catch(_){} }   // v18.3: free the old instance buffers
-    const lists=[[tents0,banners0,fire0,fk0],[tents0.map(Rp),banners0.map(Rp),Rp(fire0),fk1]];
-    for(const [tents,banners,fire,fk] of lists){
+    const lists=[[tents0,banners0,fires0,fk0],[tents0.map(Rp),banners0.map(Rp),fires0.map(Rp),fk1]];
+    for(const [tents,banners,fl,fk] of lists){
       const tm=new THREE.InstancedMesh(tentGeo[fk],propMat,tents.length);
-      tents.forEach((p,i)=>{ dm.position.set(p.x,heightAt(p.x,p.y),p.y); dm.rotation.set(0,-Math.atan2(fire.y-p.y,fire.x-p.x),0); dm.scale.setScalar(1); dm.updateMatrix(); tm.setMatrixAt(i,dm.matrix); });
+      tents.forEach((p,i)=>{ const fire=nearFire(p,fl); dm.position.set(p.x,heightAt(p.x,p.y),p.y); dm.rotation.set(0,-Math.atan2(fire.y-p.y,fire.x-p.x),0); dm.scale.setScalar(1); dm.updateMatrix(); tm.setMatrixAt(i,dm.matrix); });
       tm.castShadow=true; tm.receiveShadow=true; dressingGroup.add(tm);
       const bm=new THREE.InstancedMesh(bannerGeo[fk],propMat,banners.length);
       banners.forEach((p,i)=>{ dm.position.set(p.x,heightAt(p.x,p.y),p.y); dm.rotation.set(0,tents===tents0?0:Math.PI,0); dm.scale.setScalar(1); dm.updateMatrix(); bm.setMatrixAt(i,dm.matrix); });
@@ -5210,8 +5242,15 @@ function buildDressing(){
   rebuildFactionDressing=function(fk0,fk1){
     prevRebuild(fk0,fk1);
     [fk0,fk1].forEach((fk,team)=>{
-      const pieces=KEEP_WALLS.filter(w=>w.team===team && !w.gate);
-      const turrets=pieces.filter(w=>KEEP_WALLS.some(g=>g.team===team && g.gate && Math.hypot(g.x-w.x,g.y-w.y)<CELL*1.5));
+      // v20: the wall is drawn along the true circle (the blocked ring cells only decide where it stands and where the gates are),
+      // so the much wider courtyard wall reads as one smooth curtain instead of a staircase of cells
+      const k=MAP.keeps[team], WR=CONFIG.keep.wallR, cells=KEEP_WALLS.filter(w=>w.team===team);
+      const kind=a=>{ const x=k.x+Math.cos(a)*WR, y=k.y+Math.sin(a)*WR; let best=null, bd=1e9; for(const w of cells){ const d=Math.hypot(w.x-x,w.y-y); if(d<bd){ bd=d; best=w; } } return !best||bd>CELL*1.2?'none':best.gate?'gate':'wall'; };
+      const N=Math.max(24,Math.round(TAU*WR/24)), samp=[];
+      for(let i=0;i<N;i++){ const a=i*TAU/N; samp.push({ a, k:kind(a), x:k.x+Math.cos(a)*WR, y:k.y+Math.sin(a)*WR }); }
+      const pieces=samp.filter(q=>q.k==='wall');
+      const turrets=samp.filter((q,i)=>q.k==='wall' && (samp[(i+1)%N].k!=='wall' || samp[(i+N-1)%N].k!=='wall'));
+      if(WR>200){ const step=Math.round(N/8); samp.forEach((q,i)=>{ if(i%step===0 && q.k==='wall' && !turrets.some(t=>Math.abs(angDiff(t.a,q.a))<TAU/N*4)) turrets.push(q); }); }   // towers along the long curtain
       for(const [geo,list,sc] of [[wallGeo[fk],pieces,1],[turretGeo[fk],turrets,1]]){
         const m=new THREE.InstancedMesh(geo,propMat,list.length);
         list.forEach((w,i)=>{ dm.position.set(w.x,heightAt(w.x,w.y)-1,w.y); dm.rotation.set(0,-w.a,0); dm.scale.setScalar(sc); dm.updateMatrix(); m.setMatrixAt(i,dm.matrix); });
@@ -5221,8 +5260,9 @@ function buildDressing(){
   };
   rebuildFactionDressing('covenant','forsaken');
   // campfires
-  const fires=[fire0,Rp(fire0)];
+  const fires=[...fires0,...fires0.map(Rp)];
   put(buildCampfire(),fires,1,()=>0);
+  if(crates0.length) put(buildCrates(),[...crates0,...crates0.map(Rp)],1);   // v20: supplies around the courtyard camp
   for(const f of fires){ EMITTERS.push({x:f.x,y:f.y,h:4,kind:'fire'}); EMITTERS.push({x:f.x,y:f.y,h:10,kind:'smoke'}); }
   // fences along parts of each lane
   const fences=[];
@@ -5500,7 +5540,7 @@ function labCmdHTML(){
     ${L?`<ul class="barks">${L.barks.map(t=>`<li>${t}</li>`).join('')}</ul>`:''}
     <p>${c.blurb}</p>
     <div class="uvs"><b>Own units</b>${c.units.map(u=>`<span class="lchip">${UNITS[u].name} (${ROMAN[UNITS[u].rank]})</span>`).join('')}</div>
-    <div class="uvs"><b>Commander strike</b><span class="lchip">${FACTIONS[c.faction].super.name}: ${FACTIONS[c.faction].super.dmg} damage, ${FACTIONS[c.faction].super.radius} wide</span></div>`;
+    <div class="uvs"><b>Commander strike</b><span class="lchip">${FACTIONS[c.faction].super.name}: ${FACTIONS[c.faction].super.dmg} damage, ${FACTIONS[c.faction].super.radius} wide, then burns · Rank ${ROMAN[CONFIG.super.rank]}</span></div>`;
 }
 function renderLabInfo(){
   const box=$('labCard'); if(!box) return;
@@ -6703,11 +6743,12 @@ function buildGrimoire(){
   });
   grim.appendChild(seal); slots.seal=seal;
   const sup=document.createElement('button'); sup.className='slot super'; sup.type='button';
-  sup.innerHTML=`<canvas class="ic" width="80" height="48"></canvas><span class="nm">${T.faction.super.short}</span><span class="cost">${CONFIG.super.cost}</span><span class="cdv"></span><span class="cdt"></span>`;
+  sup.innerHTML=`<canvas class="ic" width="80" height="48"></canvas><span class="nm">${T.faction.super.short}</span><span class="cost">${CONFIG.super.cost}</span><span class="cdv"></span><span class="cdt"></span><span class="lock" hidden>${ROMAN[CONFIG.super.rank]}</span>`;
   drawSuperIcon(sup.querySelector('canvas'),T);
   sup.addEventListener('click',()=>{
     if(!playable() || S.phase!=='play') return;
     const T=S.teams[ME];
+    if(T.rank<CONFIG.super.rank){ toast(`${T.faction.super.name} unlocks with the Rank ${ROMAN[CONFIG.super.rank]} seal`,'info'); return; }
     if(T.superCd>0){ toast(`${T.faction.super.name} ready in ${Math.ceil(T.superCd)} s`,'info'); return; }
     if(T.gold<CONFIG.super.cost){ toast(`Need ${CONFIG.super.cost} gold for ${T.faction.super.name}`,'bad'); return; }
     S.armedSuper=!S.armedSuper; S.armed=null;
@@ -6753,7 +6794,9 @@ function updateGrimoire(){
   const cd=T.superCd/CONFIG.super.cooldown;
   slots.sup.style.setProperty('--cd',cd.toFixed(3));
   slots.sup.querySelector('.cdt').textContent=T.superCd>0?Math.ceil(T.superCd):'';
-  slots.sup.classList.toggle('poor',T.gold<CONFIG.super.cost);
+  const supLocked=T.rank<CONFIG.super.rank;
+  slots.sup.classList.toggle('locked',supLocked); slots.sup.querySelector('.lock').hidden=!supLocked;
+  slots.sup.classList.toggle('poor',!supLocked && T.gold<CONFIG.super.cost);
   slots.sup.classList.toggle('armed',S.armedSuper);
   slots.sup.classList.toggle('cooling',T.superCd>0);
 }
@@ -7029,7 +7072,7 @@ function onTap(x,y){
   if(!S || S.demo) return;
   const now=performance.now(), w=s2w(x,y);
   if(S.phase==='play' && !S.paused){
-    if(S.armedSuper){ const T=S.teams[ME]; if(T.superCd<=0 && T.gold>=CONFIG.super.cost){ issueCmd({ k:'super', team:ME, x:w.x, y:w.y }); S.armedSuper=false; } return; }
+    if(S.armedSuper){ const T=S.teams[ME]; if(T.rank>=CONFIG.super.rank && T.superCd<=0 && T.gold>=CONFIG.super.cost){ issueCmd({ k:'super', team:ME, x:w.x, y:w.y }); S.armedSuper=false; } return; }
     if(S.armed){ tryDeploy(S.armed,w.x,w.y); return; }
   }
   const hit=pickAt(x,y,e=>!(e.dead&&!isStruct(e)));
